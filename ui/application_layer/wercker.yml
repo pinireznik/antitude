@@ -1,0 +1,18 @@
+box: wercker-labs/docker
+
+build:
+    steps:
+      - script:
+         name: build python_webapp image
+         code: |-
+           ./build.sh
+           ./test.sh
+           ./push.sh
+deploy:
+    steps:
+      - wercker/add-ssh-key:
+         keyname: EC2SSHKEY
+      - script:
+         name: deploy to EC2
+         code: |-
+           ssh -o StrictHostKeyChecking=no ubuntu@54.213.8.33 < deploy.sh
