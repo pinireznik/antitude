@@ -1,5 +1,5 @@
 import site
-site.addsitedir('/opt/visualise/')
+site.addsitedir('/opt/mitosis_web/')
 from app import app as application
 
 #def application(environ, start_response):
