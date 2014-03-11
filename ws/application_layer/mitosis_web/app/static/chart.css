@@ -1,0 +1,68 @@
+
+.axis path,
+.axis line {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+
+.laxis path,
+.laxis line {
+  stroke: #2F5E92;
+}
+.raxis path,
+.raxis line { 
+  stroke: #d94412;
+}
+.tick {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 12px;
+}
+
+.symbol1 {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 12px;
+  fill: #2F5E92;
+}
+
+.symbol2 {
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 12px;
+  fill: #d94412;
+}
+
+.line {
+  fill: none;
+  stroke: #d94412;
+  stroke-width: 1px;
+}
+.new-line {
+  fill: none;
+  stroke: #2F5E92;
+  stroke-width: 1px;
+}
+
+#table {
+    float:left;
+}
+
+#desc {
+    clear: both;
+}
+
+.hide {
+  display: none;
+}
+
+.loader {
+  padding-left: 220px;
+  padding-top: 80px;
+}
+
+.supply-tag {
+
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+  font-size: 12px;
+}
