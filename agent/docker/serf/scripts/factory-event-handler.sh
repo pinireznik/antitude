@@ -11,6 +11,6 @@ elif [ "${SERF_USER_EVENT}" = "FIXED" ]; then
 elif [ "${SERF_USER_EVENT}" = "MEMORY" ]; then
         echo "memory use on agent $PAYLOAD" >> $LOG_FILE
 else 
-	echo "Event=${SERF_USER_EVENT} Payload=${PAYLOAD}" >> $LOG_FILE
+	echo "`date '+%F %T'` ${SERF_USER_LTIME} ${SERF_EVENT}${SERF_USER_EVENT} PAYLOAD=${PAYLOAD}" >> $LOG_FILE
 fi
 echo "${SERF_USER_EVENT}"
