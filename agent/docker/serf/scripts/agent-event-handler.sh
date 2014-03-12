@@ -1,11 +1,14 @@
 #!/bin/bash
+
+MEMORY_FILE=/tmp/memory.tmp
 read AGENT_IP
-if [ "${SERF_USER_EVENT}" = "OVERLOADED" ]; then
-        echo "create new container for $AGENT_IP" >> /tmp/test.txt
-        /usr/bin/docker run -d -name node3 -link node1:serf uglyduckling.nl/serf
-elif [ "${SERF_USER_EVENT}" = "FIXED" ]; then
-        echo "fixed agent $AGENT_IP" >> /tmp/test.txt
-elif [ "${SERF_USER_EVENT}" = "MEMORY" ]; then
-        echo "memory use on agent $AGENT_IP" >> /tmp/test.txt
+if [ "${SERF_USER_EVENT}" = "TEST_SET_MEMORY" ]; then
+  echo "Received TEST_SET_MEMORY event on $AGENT_IP" >> /tmp/test.txt
+  PAYLOAD=""
+  while read line; do
+    $PAYLOAD=${line}
+  done
+  echo $PAYLOAD > $MEMORY_FILE
+  serf event TEST_SET_EVENT_RCVD
 fi
 echo "${SERF_USER_EVENT}"
