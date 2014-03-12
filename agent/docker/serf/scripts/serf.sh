@@ -4,6 +4,10 @@
 set -e
 
 export PATH=$PATH:/usr/local/bin
+IP_ADDRESS=`hostname -i`
+LOG_FILE=/tmp/logging/$IP_ADDRESS.log
+LINE=`cat /proc/1/cgroup | tail -n 1`
+echo ${LINE: -64} >> $LOG_FILE
 
 supervisord
 
