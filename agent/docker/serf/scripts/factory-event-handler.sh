@@ -1,11 +1,16 @@
  #!/bin/bash
-read AGENT_IP
+LOG_FILE=./mitosis.log
+
+read PAYLOAD
+
 if [ "${SERF_USER_EVENT}" = "OVERLOADED" ]; then
-        echo "create new container for $AGENT_IP" >> /tmp/test.txt
+        echo "create new container for $PAYLOAD" >> $LOG_FILE
         /usr/bin/docker run -d -name node3 -link node1:serf uglyduckling.nl/serf
 elif [ "${SERF_USER_EVENT}" = "FIXED" ]; then
-        echo "fixed agent $AGENT_IP" >> /tmp/test.txt
+        echo "fixed agent $PAYLOAD" >> $LOG_FILE
 elif [ "${SERF_USER_EVENT}" = "MEMORY" ]; then
-        echo "memory use on agent $AGENT_IP" >> /tmp/test.txt
+        echo "memory use on agent $PAYLOAD" >> $LOG_FILE
+else 
+	echo "Event=${SERF_USER_EVENT} Payload=${PAYLOAD}" >> $LOG_FILE
 fi
 echo "${SERF_USER_EVENT}"
