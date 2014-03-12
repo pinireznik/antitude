@@ -12,7 +12,7 @@ FILENAME_OVERLOAD	= "/tmp/restart/load.tmp"
 IP_ADDRESS		= socket.gethostbyname(socket.gethostname())
 MEMORY_LIMIT		= "50"
 FIXED_STRING		= "event FIXED " + IP_ADDRESS
-MEMORY_FILE		= "/tmp/restart/memory.tmp"
+MEMORY_FILE		= "/tmp/memory.tmp"
 
 while True:
   time.sleep(1)
