@@ -26,22 +26,18 @@ from twisted.web.wsgi import WSGIResource
 
 from flask import Flask, render_template, request
 
-from autobahn.twisted.websocket import WebSocketServerProtocol
-
 from autobahn.twisted.resource import (WebSocketResource,
                                        WSGIRootResource,
                                        HTTPChannelHixie76Aware)
 
-from autobahn.twisted.wamp import ApplicationSession
-from twisted.internet.defer import inlineCallbacks
-from autobahn.twisted.util import sleep
+from autobahn.twisted.wamp import ApplicationSession, RouterSessionFactory
 from autobahn.twisted.websocket import WampWebSocketServerFactory
-from autobahn.twisted.wamp import RouterSessionFactory
+from autobahn.wamp.router import RouterFactory
 
 
-class Component(ApplicationSession):
+class MessagePublisher(ApplicationSession):
     """
-    An application component that publishes an event every second.
+    Publishes recieved messages to all listeners
     """
 
     def __init__(self, realm="realm1"):
@@ -51,25 +47,8 @@ class Component(ApplicationSession):
     def onConnect(self):
         self.join(self._realm)
 
-    @inlineCallbacks
-    def onJoin(self, details):
-        counter = 0
-        while True:
-            self.publish('com.myapp.topic1', counter)
-            counter += 1
-            yield sleep(1)
-
-    def test_message(self, test):
-        self.publish('com.myapp.topic1', "Got messages %s" % test)
-
-
-##
-## Our WebSocket Server protocol
-##
-class EchoServerProtocol(WebSocketServerProtocol):
-
-    def onMessage(self, payload, isBinary):
-        self.sendMessage("Bugger off", isBinary)
+    def publish_message(self, message):
+        self.publish('com.myapp.topic1', "%s" % message)
 
 
 ##
@@ -77,7 +56,7 @@ class EchoServerProtocol(WebSocketServerProtocol):
 ##
 app = Flask(__name__)
 app.secret_key = str(uuid.uuid4())
-comp = Component()
+comp = MessagePublisher()
 
 
 @app.route('/')
@@ -85,13 +64,13 @@ def page_home():
     return render_template('index.html')
 
 
-@app.route('/send', methods=["PUT", "POST"])
-def send_message():
+@app.route('/send/<event>', methods=["PUT", "POST"])
+def send_message(event):
     data = request.data
     if not data:
         data = request.form.keys()[0]
-    comp.test_message("message %s" % data)
-    return "Sent %s" % data
+    comp.publish_message('{"%s": "%s"}' % (event, data))
+    return "Sent %s %s" % (event, data)
 
 if __name__ == "__main__":
 
@@ -108,7 +87,6 @@ if __name__ == "__main__":
     ##
     ## create a Twisted Web resource for our WebSocket server
     ##
-    from autobahn.wamp.router import RouterFactory
     router_factory = RouterFactory()
     session_factory = RouterSessionFactory(router_factory)
     session_factory.add(comp)
@@ -119,8 +97,6 @@ if __name__ == "__main__":
                                            debugCodePaths=debug)
 
     wsFactory.setProtocolOptions(failByDrop=False)
-    #wsFactory.protocol = EchoServerProtocol
-    #wsFactory.setProtocolOptions(allowHixie76=True)  # needed if Hixie76 is to be supported
 
     wsResource = WebSocketResource(wsFactory)
 
