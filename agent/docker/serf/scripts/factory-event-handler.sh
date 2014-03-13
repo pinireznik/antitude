@@ -5,7 +5,6 @@ HOST_FILE=agentstartup/factoryip
 read PAYLOAD
 
 echo "Received user event ${SERF_USER_EVENT} with payload $PAYLOAD" >> $LOG_FILE
-LOG_FILE=./mitosis.log
 TEST_FILE=./test/test.txt
 
 read PAYLOAD
