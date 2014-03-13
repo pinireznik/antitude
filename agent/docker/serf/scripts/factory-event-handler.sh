@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash 
 LOG_FILE=logging/factory.log
 HOST_FILE=agentstartup/factoryip
 
