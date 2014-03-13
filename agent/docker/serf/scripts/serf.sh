@@ -16,13 +16,11 @@ supervisord
 # Check if serf-port is set and if so define the join string
 if [ -n "$SERF_PORT_7946_TCP_ADDR" ]; then
   echo "Found: $SERF_PORT_7946_TCP_ADDR" >> $LOG_FILE
-  echo "Before assignment" >> $LOG_FILE
   JOIN_STRING="-join $SERF_PORT_7946_TCP_ADDR"
-  echo "After assignment" >> $LOG_FILE
   echo $JOIN_STRING
 fi
 
 echo Joining $IP_ADDRESS with event handler >> $LOG_FILE
-serf agent $JOIN_STRING -event-handler=`pwd`/agent-event-handler.sh -role=functional_agent
+serf agent $JOIN_STRING -event-handler=`pwd`/agent-event-handler.sh -role=functional_agent >> $LOG_FILE
 
 
