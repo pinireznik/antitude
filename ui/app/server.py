@@ -24,7 +24,7 @@ from twisted.internet import reactor
 from twisted.web.server import Site
 from twisted.web.wsgi import WSGIResource
 
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 from autobahn.twisted.websocket import WebSocketServerProtocol
 
@@ -85,10 +85,13 @@ def page_home():
     return render_template('index.html')
 
 
-@app.route('/send')
+@app.route('/send', methods=["PUT", "POST"])
 def send_message():
-    comp.test_message("boo")
-    return "Sent"
+    data = request.data
+    if not data:
+        data = request.form.keys()[0]
+    comp.test_message("message %s" % data)
+    return "Sent %s" % data
 
 if __name__ == "__main__":
 
