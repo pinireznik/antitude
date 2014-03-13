@@ -1,16 +1,18 @@
- #!/bin/bash
-LOG_FILE=./mitosis.log
+#!/bin/bash
+LOG_FILE=logging/factory.log
+HOST_FILE=agentstartup/factoryip
 
 read PAYLOAD
 
-if [ "${SERF_USER_EVENT}" = "OVERLOADED" ]; then
-        echo "create new container for $PAYLOAD" >> $LOG_FILE
-        /usr/bin/docker run -d -name node3 -link node1:serf uglyduckling.nl/serf
-elif [ "${SERF_USER_EVENT}" = "FIXED" ]; then
-        echo "fixed agent $PAYLOAD" >> $LOG_FILE
-elif [ "${SERF_USER_EVENT}" = "MEMORY" ]; then
-        echo "memory use on agent $PAYLOAD" >> $LOG_FILE
-fi
-echo "`date '+%F %T'` ${SERF_USER_LTIME} ${SERF_EVENT} ${SERF_USER_EVENT} PAYLOAD=${PAYLOAD}" >> $LOG_FILE
+echo "Received user event ${SERF_USER_EVENT} with payload $PAYLOAD" >> $LOG_FILE
 
-echo "${SERF_USER_EVENT}"
+if [ "${SERF_USER_EVENT}" = "NEWNODE" ]; then
+  HOSTNAME=`hostname`
+  echo $HOSTNAME >> $LOG_FILE
+  IP_ADDRESS=`./serf members | grep $HOSTNAME | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'`
+  echo $IP_ADDRESS >> $LOG_FILE
+  echo $IP_ADDRESS > agentstartup/factoryip
+  echo "Creating new container for $PAYLOAD" >> $LOG_FILE
+  /usr/bin/docker run -d -v `pwd`/logging:/tmp/logging -v `pwd`/agentstartup:/tmp/factoryip uglyduckling.nl/serf
+  echo Exit code: $? >> $LOG_FILE
+fi

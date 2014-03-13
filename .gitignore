@@ -1,2 +1,3 @@
 agent/serf/docker/serf/itosis.log
 agent/docker/serf/logging/*
+/vagrant/mitosis/agent/docker/serf/agentstartup/factoryip
