@@ -1,5 +1,6 @@
- #!/bin/bash
+#!/bin/bash
 LOG_FILE=./mitosis.log
+TEST_FILE=./test/test.txt
 
 read PAYLOAD
 
@@ -8,6 +9,8 @@ if [ "${SERF_USER_EVENT}" = "OVERLOADED" ]; then
         /usr/bin/docker run -d -name node3 -link node1:serf uglyduckling.nl/serf
 elif [ "${SERF_USER_EVENT}" = "FIXED" ]; then
         echo "fixed agent $PAYLOAD" >> $LOG_FILE
+	# writing to the test file
+	echo "$PAYLOAD ${SERF_USER_EVENT}" >> $TEST_FILE
 elif [ "${SERF_USER_EVENT}" = "MEMORY" ]; then
         echo "memory use on agent $PAYLOAD" >> $LOG_FILE
 fi
