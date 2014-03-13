@@ -8,6 +8,7 @@ IP_ADDRESS=`hostname -i`
 LOG_FILE=/tmp/logging/$IP_ADDRESS.log
 LINE=`cat /proc/1/cgroup | tail -n 1`
 echo ${LINE: -64} >> $LOG_FILE
+FACTORYIP_FILE=/tmp/factoryip/factoryip
 
 JOIN_STRING=""
 
@@ -18,6 +19,9 @@ if [ -n "$SERF_PORT_7946_TCP_ADDR" ]; then
   echo "Found: $SERF_PORT_7946_TCP_ADDR" >> $LOG_FILE
   JOIN_STRING="-join $SERF_PORT_7946_TCP_ADDR"
   echo $JOIN_STRING
+elif [ -f "$FACTORYIP_FILE" ]; then
+  echo "Found $FACTORYIP_FILE" >> $LOG_FILE
+  JOIN_STRING="-join `cat $FACTORYIP_FILE`"
 fi
 
 echo Joining $IP_ADDRESS with event handler >> $LOG_FILE
