@@ -12,45 +12,7 @@
         }
 
     }
-
-    connection.onopen = function (session) {
-
-        var received = 0;
-
-        function onevent1(args) {
-
-            message = jQuery.parseJSON(args);
-            logMessage(message);
-
-            for (var key in message) {
-                console.log("got key " + key);
-                if (key === "FIXING") {
-                    var target = "A" + message[key].replace(/\./g, "d");
-                    console.log("got fixing *" + target + "*");
-                    d3.select("#" + target).classed("success", false);
-                    d3.select("#" + target).classed("warning", true);
-                } else if (key === "FIXED") {
-                    var target = "A" + message[key].replace(/\./g, "d");
-                    d3.select("#" + target).classed("warning", false);
-                    d3.select("#" + target).classed("success", true);
-                }
-            }
-
-
-            received += 1;
-            if (received > 5000) {
-                console.log("Closing ..");
-                connection.close();
-            }
-        }
-
-        session.subscribe('mitosis.event', onevent1);
-    };
-
-    connection.open();
-
-
-    d3.json("members", function(error, json) {
+    function memberTable(error, json) {
         if (error) {
             return console.warn(error);
         }
@@ -77,5 +39,46 @@
         thead.append("th").text("Status");
 
 
-    });
+    }
+    connection.onopen = function (session) {
+
+        var received = 0;
+
+        function onevent1(args) {
+
+            message = jQuery.parseJSON(args);
+            logMessage(message);
+
+            for (var key in message) {
+                console.log("got key " + key);
+                if (key === "FIXING") {
+                    var target = "A" + message[key].replace(/\./g, "d");
+                    console.log("got fixing *" + target + "*");
+                    d3.select("#" + target).classed("success", false);
+                    d3.select("#" + target).classed("warning", true);
+                } else if (key === "FIXED") {
+                    var target = "A" + message[key].replace(/\./g, "d");
+                    d3.select("#" + target).classed("warning", false);
+                    d3.select("#" + target).classed("success", true);
+                } else if (key === "NEWNODE") {
+                    setTimeout(function() {
+                        d3.json("members", memberTable);}, 200);
+                }
+            }
+
+
+            received += 1;
+            if (received > 5000) {
+                console.log("Closing ..");
+                connection.close();
+            }
+        }
+
+        session.subscribe('mitosis.event', onevent1);
+    };
+
+    connection.open();
+
+
+    d3.json("members", memberTable);
 })();

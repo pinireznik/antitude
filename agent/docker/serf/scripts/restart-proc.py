@@ -1,5 +1,4 @@
 #!/usr/bin/python -u
-import yaml
 import socket
 import time
 import os
@@ -13,9 +12,12 @@ IP_ADDRESS		= socket.gethostbyname(socket.gethostname())
 MEMORY_LIMIT		= "50"
 FIXED_STRING		= "event FIXED " + IP_ADDRESS
 MEMORY_FILE		= "/tmp/memory.tmp"
+LOG_FILE		= "/tmp/logging/" + IP_ADDRESS + ".log"
 
 while True:
   time.sleep(1)
+  with open(LOG_FILE, "a") as myfile:
+    myfile.write("IN RESTART PROC")
   if os.path.isfile(FILENAME_BREAK):
     try:
       print "Restarting service and removing " + FILENAME_BREAK
