@@ -16,6 +16,7 @@ elif [ "${SERF_USER_EVENT}" = "REMOVENODE" ]; then
   echo "`date '+%F %T'` Removing container with ID = $PAYLOAD" >> $LOG_FILE
   /usr/bin/docker kill $PAYLOAD
   /usr/bin/docker rm $PAYLOAD
+  ./serf force-leave $PAYLOAD
 elif [ "${SERF_USER_EVENT}" = "FIXED" ]; then
   echo "`date '+%F %T'` fixed agent $PAYLOAD" >> $LOG_FILE
   # writing to the test file
