@@ -18,13 +18,14 @@
 
 import uuid
 import sys
+import subprocess
 
 from twisted.python import log
 from twisted.internet import reactor
 from twisted.web.server import Site
 from twisted.web.wsgi import WSGIResource
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response
 
 from autobahn.twisted.resource import (WebSocketResource,
                                        WSGIRootResource,
@@ -48,7 +49,7 @@ class MessagePublisher(ApplicationSession):
         self.join(self._realm)
 
     def publish_message(self, message):
-        self.publish('com.myapp.topic1', "%s" % message)
+        self.publish('mitosis.event', "%s" % message)
 
 
 ##
@@ -64,10 +65,25 @@ def page_home():
     return render_template('index.html')
 
 
+@app.route('/members')
+def get_members():
+    p = subprocess.Popen(['../../agent/docker/serf/serf members -format json'],
+                         shell=True,
+                         stdout=subprocess.PIPE,
+                         stderr=subprocess.STDOUT)
+    members = p.stdout.read()
+    resp = Response(response=members,
+                    status=200,
+                    mimetype="application/json")
+    return resp
+
+
 @app.route('/send/<event>', methods=["PUT", "POST"])
 def send_message(event):
-    data = request.data
-    if not data:
+    data = ""
+    if request.data:
+        data = request.data
+    elif len(request.form.keys()) > 0:
         data = request.form.keys()[0]
     comp.publish_message('{"%s": "%s"}' % (event, data))
     return "Sent %s %s" % (event, data)
