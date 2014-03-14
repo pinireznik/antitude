@@ -18,7 +18,7 @@ import org.junit.Test;
 public class SpeakToCommandLine {
 
 	private ArrayList<FunctionalAgent> agents;
-	private String FILE_NAME = "/home/preznik/dev/mitosis/agent/docker/serf/test/test.txt";
+	private String FILE_NAME = "./test/test.txt";
 	
 	
 	@After
