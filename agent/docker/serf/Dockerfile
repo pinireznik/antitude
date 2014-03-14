@@ -17,8 +17,8 @@ ADD /supervisor_conf /etc/supervisor/conf.d
 ADD /scripts /
 
 # Add the requirements.txt and ask pip to install everything
-ADD requirements.txt /tmp/requirements.txt
-RUN pip install -r /tmp/requirements.txt
+#ADD requirements.txt /tmp/requirements.txt
+#RUN pip install -r /tmp/requirements.txt
 
 # Expose Serf
 EXPOSE 7946
