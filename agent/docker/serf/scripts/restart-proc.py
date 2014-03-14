@@ -16,8 +16,6 @@ LOG_FILE		= "/tmp/logging/" + IP_ADDRESS + ".log"
 
 while True:
   time.sleep(1)
-  with open(LOG_FILE, "a") as myfile:
-    myfile.write("IN RESTART PROC")
   if os.path.isfile(FILENAME_BREAK):
     try:
       print "Restarting service and removing " + FILENAME_BREAK
