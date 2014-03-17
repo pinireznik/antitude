@@ -67,7 +67,7 @@ def page_home():
 
 @app.route('/members')
 def get_members():
-    p = subprocess.Popen(['serf members -format json'],
+    p = subprocess.Popen(['../../agent/docker/serf/serf members -format json'],
                          shell=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
