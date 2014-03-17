@@ -9,6 +9,11 @@ LOG_FILE=/tmp/logging/$IP_ADDRESS.log
 LINE=`cat /proc/1/cgroup | tail -n 1`
 echo ${LINE: -64} >> $LOG_FILE
 
+if [ -z "$EVENT_HANDLER" ]; then
+  echo "EVENT_HANDLER environment variable is empty. Exiting." >> $LOG_FILE
+  exit 1
+fi
+
 JOIN_STRING=""
 
 supervisord
@@ -19,7 +24,6 @@ if [ -n $FACTORY_IPADDRESS ]; then
   JOIN_STRING="-join $FACTORY_IPADDRESS"
 fi
 
-echo serf agent $JOIN_STRING -event-handler=`pwd`/agent-event-handler.sh -role=functional_agent >> $LOG_FILE
-serf agent $JOIN_STRING -event-handler=`pwd`/agent-event-handler.sh -role=functional_agent >> $LOG_FILE
+serf agent $JOIN_STRING -event-handler=`pwd`/$EVENT_HANDLER -role=functional_agent >> $LOG_FILE
 
 
