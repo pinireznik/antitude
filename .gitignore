@@ -4,3 +4,4 @@ agent/docker/serf/logging/*
 *.swp
 logging
 *.log
+*.pyc
