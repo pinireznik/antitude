@@ -1,4 +1,7 @@
+#!/usr/bin/python
 import re
+import os
+import SerfCID
 
 class AgentEventHandler:
 	def __init__ (self, payload="", CID="", envVarGetter=""):
@@ -37,11 +40,21 @@ class AgentEventHandler:
 			argumentPair = self.TARGET_ALL_STRING
 		else:
 			argumentPair = self.getArgumentPair(self.TARGET_STRING)
-			
+		
 		if self.getArgumentValue(argumentPair) == self.CID or self.getArgumentValue(argumentPair) == "ALL":
 			return True
 		else:
 			return False
 			
 if __name__ == '__main__':
-	unittest.main()
+	PAYLOAD = raw_input()
+	CID			= SerfCID.SerfCID.getCID()
+	envVarGetter = os.environ
+	
+	print PAYLOAD
+	print CID
+	agentEventHandler = AgentEventHandler(PAYLOAD, CID, envVarGetter)
+	if not agentEventHandler.correctTarget():
+		print "It's not for me!"
+	else:
+		print "It's for me!"

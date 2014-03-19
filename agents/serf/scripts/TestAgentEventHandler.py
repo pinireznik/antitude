@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import AgentEventHandler
 import MockOsEnviron
 import unittest
