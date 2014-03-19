@@ -45,16 +45,21 @@ class AgentEventHandler:
 			return True
 		else:
 			return False
+	
+	def serfEventIs(self, targetValue):
+		serfEventValue = self.getEnvVar("SERF_EVENT")
+		if serfEventValue == targetValue:
+			return True
+		else:
+			return False
 			
 if __name__ == '__main__':
 	PAYLOAD = raw_input()
 	CID			= SerfCID.SerfCID.getCID()
 	envVarGetter = os.environ
 	
-	print PAYLOAD
-	print CID
 	agentEventHandler = AgentEventHandler(PAYLOAD, CID, envVarGetter)
-	if not agentEventHandler.correctTarget():
-		print "It's not for me!"
-	else:
-		print "It's for me!"
+	
+	if agentEventHandler.serfEventIs("user") and agentEventHandler.correctTarget(): # Check that this is a user event and that it is intended for this container
+		eventName = agentEventHandler.getEnvVar("SERF_USER_EVENT")
+		print eventName
