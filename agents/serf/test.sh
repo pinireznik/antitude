@@ -6,4 +6,4 @@ docker run -i -t uglyduckling.nl/serf ./TestAgentEventHandler.py
 docker run -i -t uglyduckling.nl/serf ./TestMockOsEnviron.py
 
 echo RUNNING SYSTEM TESTS
-echo NO SYSTEM TESTS YET
+docker run -i -t uglyduckling.nl/serf ./testAgentEventHandler.sh

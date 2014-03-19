@@ -60,6 +60,13 @@ if __name__ == '__main__':
 	
 	agentEventHandler = AgentEventHandler(PAYLOAD, CID, envVarGetter)
 	
+	print agentEventHandler.serfEventIs("user")
+	print agentEventHandler.correctTarget()
+	
 	if agentEventHandler.serfEventIs("user") and agentEventHandler.correctTarget(): # Check that this is a user event and that it is intended for this container
 		eventName = agentEventHandler.getEnvVar("SERF_USER_EVENT")
-		print eventName
+		
+		if globals().get(eventName, False):
+			print "Found event handler for event: " + eventName
+		else:
+			print "Could not find event handler for event: " + eventName
