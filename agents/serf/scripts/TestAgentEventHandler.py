@@ -86,10 +86,8 @@ class TestAgentEventHandler(unittest.TestCase):
                 envVars={"SERF_EVENT": "user", "SERF_USER_EVENT": "TEST_SET_MEMORY"},
                 handlers={"TEST_SET_MEMORY": testMemoryHandler})
             agentEventHandler.handleShit()
-            l.check((AgentEventHandler.__name__,
-                     'INFO',
-                     'Handling Event: TEST_SET_MEMORY'),
-                    ('__main__', 'INFO', 'Called memory handler'))
+            log = str(l)
+            self.assertTrue("Called memory handler" in log)
 
 if __name__ == '__main__':
     unittest.main()

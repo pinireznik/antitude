@@ -7,6 +7,7 @@ import socket
 import sys
 
 MEMORY_FILE = "/tmp/memory.tmp"
+BREAK_FILE = "/tmp/break.tmp"
 
 
 class AgentEventHandler:
@@ -59,18 +60,22 @@ class AgentEventHandler:
         # Check we have a user event intended for this container
         if self.serfEventIs("user") and self.correctTarget():
             eventName = self.getEnvVar("SERF_USER_EVENT")
-            self.logger.info("Handling Event: %s" % eventName)
             if eventName in self.handlers:
+                self.logger.info(
+                    "Processing user event: %s with payload of %s" % (eventName, self.payload))
                 self.handlers[eventName](eventName, self.payload)
+                self.logger.info("Processed.")
 
 
 def memoryHandler(event, payload):
-    logger = logging.getLogger(__name__)
-    logger.info("Processing user event: %s with payload of %s" % (event, payload))
     with open(MEMORY_FILE, 'w') as f:
         for l in payload:
             f.write(l)
-    logger.info("Processed user event: %s with payload of %s" % (event, payload))
+
+
+def breakHandler(event, payload):
+    if not os.path.exists(BREAK_FILE):
+        open('file', 'w').close()
 
 
 if __name__ == '__main__':
