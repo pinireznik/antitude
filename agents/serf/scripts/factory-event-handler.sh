@@ -8,7 +8,7 @@ if [ "${SERF_USER_EVENT}" = "NEWNODE" ]; then
   HOSTNAME=`hostname`
   IP_ADDRESS=`./serf members | grep $HOSTNAME | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'`
   echo "`date '+%F %T'` Creating node and attaching to factory at $IP_ADDRESS" >> $LOG_FILE
-  CID=$(/usr/bin/docker run -e "FACTORY_IPADDRESS=$IP_ADDRESS" -e "EVENT_HANDLER=agent-event-handler.sh" -d -v `pwd`/logging:/tmp/logging uglyduckling.nl/serf)
+  CID=$(/usr/bin/docker run -e "FACTORY_IPADDRESS=$IP_ADDRESS" -e "EVENT_HANDLER=AgentEventHandler.py" -d -v `pwd`/logging:/tmp/logging uglyduckling.nl/serf)
   NEWNODE_IP=`/usr/bin/docker inspect $CID | grep IPAddress | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'`i
   echo "`date '+%F %T'` Created new node with CID: $CID and public IP: $NEWNODE_IP" >> $LOG_FILE
   ./serf event NODECREATED $CID $NEWNODE_IP
