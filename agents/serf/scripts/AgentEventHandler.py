@@ -57,7 +57,7 @@ class AgentEventHandler:
 
 if __name__ == '__main__':
     PAYLOAD = raw_input()
-    CID = SerfCID.SerfCID.getCID()
+    CID = SerfCID.getCID()
 
     agentEventHandler = AgentEventHandler(PAYLOAD, CID, os.environ)
     agentEventHandler.handleShit()
