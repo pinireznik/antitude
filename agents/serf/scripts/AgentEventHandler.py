@@ -3,10 +3,14 @@ import re
 import os
 import SerfCID
 import logging
+import socket
+import sys
+
+MEMORY_FILE = "/tmp/memory.tmp"
 
 
 class AgentEventHandler:
-    def __init__(self, payload="", CID="", envVars={}, handlers={}):
+    def __init__(self, payload=[], CID="", envVars={}, handlers={}):
         self.payload = payload
         self.CID = CID
         self.TARGET_STRING = "TARGET"
@@ -22,18 +26,20 @@ class AgentEventHandler:
         return self.CID
 
     def getArgumentPair(self, argumentKey):
-        searchObj = re.search(r"%s=[^ ]*" % argumentKey, self.payload)
-        if searchObj:
-            return searchObj.group()
-        else:
-            return None
+        if len(self.payload) > 0:
+            searchObj = re.search(r"%s=[^ ]*" % argumentKey, self.payload)
+            if searchObj:
+                return searchObj.group()
+
+        return None
 
     def getArgumentValue(self, argumentPair):
-        searchObj = re.search(r'[^=]*$', argumentPair)
-        if searchObj:
-            return searchObj.group()
-        else:
-            return None
+        if argumentPair:
+            searchObj = re.search(r'[^=]*$', argumentPair)
+            if searchObj:
+                return searchObj.group()
+
+        return None
 
     def getEnvVar(self, envVarName):
         return self.envVars.get(envVarName)
@@ -55,19 +61,29 @@ class AgentEventHandler:
             eventName = self.getEnvVar("SERF_USER_EVENT")
             self.logger.info("Handling Event: %s" % eventName)
             if eventName in self.handlers:
-                self.handlers[eventName](self.payload)
+                self.handlers[eventName](eventName, self.payload)
 
 
-def memoryHandler(payload):
+def memoryHandler(event, payload):
     logger = logging.getLogger(__name__)
-    logger.info("Called memory handler")
-    print "here"
+    logger.info("Processing user event: %s with payload of %s" % (event, payload))
+    with open(MEMORY_FILE, 'w') as f:
+        for l in payload:
+            f.write(l)
+    logger.info("Processed user event: %s with payload of %s" % (event, payload))
 
 
 if __name__ == '__main__':
 
-    agentEventHandler = AgentEventHandler(payload=raw_input(),
+    if not os.path.exists('/tmp/logging'):
+        os.mkdir('/tmp/logging')
+
+    my_ip = socket.gethostbyname(socket.gethostname())
+    logging.basicConfig(filename='/tmp/logging/%s.log' % my_ip, level=logging.DEBUG)
+    payload = sys.stdin.readlines()
+    agentEventHandler = AgentEventHandler(payload=payload,
                                           CID=SerfCID.getCID(),
                                           envVars=os.environ,
                                           handlers={"TEST_SET_MEMORY": memoryHandler})
+    logging.info("Handling Shit %s " % payload)
     agentEventHandler.handleShit()

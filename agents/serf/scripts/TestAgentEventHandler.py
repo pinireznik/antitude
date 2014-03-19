@@ -75,7 +75,7 @@ class TestAgentEventHandler(unittest.TestCase):
         self.assertEqual(True, agentEventHandler.serfEventIs("user"))
 
     def testLogging(self):
-        def testMemoryHandler(payload):
+        def testMemoryHandler(event, payload):
             logger = logging.getLogger(__name__)
             logger.info("Called memory handler")
 
