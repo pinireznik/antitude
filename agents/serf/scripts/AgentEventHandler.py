@@ -6,13 +6,14 @@ import logging
 
 
 class AgentEventHandler:
-    def __init__(self, payload="", CID="", envVars={}):
+    def __init__(self, payload="", CID="", envVars={}, handlers={}):
         self.payload = payload
         self.CID = CID
         self.TARGET_STRING = "TARGET"
         self.TARGET_ALL_STRING = self.TARGET_STRING + "=ALL"
         self.envVars = envVars
         self.logger = logging.getLogger(__name__)
+        self.handlers = handlers
 
     def getPayload(self):
         return self.payload
@@ -53,11 +54,20 @@ class AgentEventHandler:
         if self.serfEventIs("user") and self.correctTarget():
             eventName = self.getEnvVar("SERF_USER_EVENT")
             self.logger.info("Handling Event: %s" % eventName)
+            if eventName in self.handlers:
+                self.handlers[eventName](self.payload)
+
+
+def memoryHandler(payload):
+    logger = logging.getLogger(__name__)
+    logger.info("Called memory handler")
+    print "here"
 
 
 if __name__ == '__main__':
-    PAYLOAD = raw_input()
-    CID = SerfCID.getCID()
 
-    agentEventHandler = AgentEventHandler(PAYLOAD, CID, os.environ)
+    agentEventHandler = AgentEventHandler(payload=raw_input(),
+                                          CID=SerfCID.getCID(),
+                                          envVars=os.environ,
+                                          handlers={"TEST_SET_MEMORY": memoryHandler})
     agentEventHandler.handleShit()

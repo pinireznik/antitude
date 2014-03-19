@@ -2,6 +2,7 @@
 import AgentEventHandler
 import unittest
 import os
+import logging
 from testfixtures import LogCapture
 
 
@@ -74,14 +75,21 @@ class TestAgentEventHandler(unittest.TestCase):
         self.assertEqual(True, agentEventHandler.serfEventIs("user"))
 
     def testLogging(self):
+        def testMemoryHandler(payload):
+            logger = logging.getLogger(__name__)
+            logger.info("Called memory handler")
+
         with LogCapture() as l:
             agentEventHandler = AgentEventHandler.AgentEventHandler(
-                self.PAYLOAD_WITH_TARGET, self.CID,
-                {"SERF_EVENT": "user", "SERF_USER_EVENT": "TEST_SET_MEMORY"})
+                payload=self.PAYLOAD_WITH_TARGET,
+                CID=self.CID,
+                envVars={"SERF_EVENT": "user", "SERF_USER_EVENT": "TEST_SET_MEMORY"},
+                handlers={"TEST_SET_MEMORY": testMemoryHandler})
             agentEventHandler.handleShit()
             l.check((AgentEventHandler.__name__,
                      'INFO',
-                     'Handling Event: TEST_SET_MEMORY'))
+                     'Handling Event: TEST_SET_MEMORY'),
+                    ('__main__', 'INFO', 'Called memory handler'))
 
 if __name__ == '__main__':
     unittest.main()
