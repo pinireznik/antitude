@@ -1,1 +1,1 @@
-PyYAML==3.10
+testfixtures==3.0.1

@@ -2,15 +2,17 @@
 import re
 import os
 import SerfCID
+import logging
 
 
 class AgentEventHandler:
-    def __init__(self, payload="", CID="", envVarGetter=""):
+    def __init__(self, payload="", CID="", envVars={}):
         self.payload = payload
         self.CID = CID
         self.TARGET_STRING = "TARGET"
         self.TARGET_ALL_STRING = self.TARGET_STRING + "=ALL"
-        self.envVarGetter = envVarGetter
+        self.envVars = envVars
+        self.logger = logging.getLogger(__name__)
 
     def getPayload(self):
         return self.payload
@@ -33,7 +35,7 @@ class AgentEventHandler:
             return None
 
     def getEnvVar(self, envVarName):
-        return self.envVarGetter.get(envVarName)
+        return self.envVars.get(envVarName)
 
     def correctTarget(self):
         argumentPair = self.getArgumentPair(self.TARGET_STRING)
@@ -44,20 +46,20 @@ class AgentEventHandler:
         return self.getArgumentValue(argumentPair) == self.CID
 
     def serfEventIs(self, targetValue):
-        serfEventValue = self.getEnvVar("SERF_EVENT")
-        if serfEventValue == targetValue:
-            return True
-        else:
-            return False
+        return targetValue == self.getEnvVar("SERF_EVENT")
+
+    def handleShit(self):
+        self.logger.info("Called")
+        # Check that this is a user event and that it is intended for this container
+        if self.serfEventIs("user") and self.correctTarget():
+            eventName = self.getEnvVar("SERF_USER_EVENT")
+            self.logger.info("Handling Event: %s" % eventName)
+            print eventName
+
 
 if __name__ == '__main__':
     PAYLOAD = raw_input()
     CID = SerfCID.SerfCID.getCID()
-    envVarGetter = os.environ
 
-    agentEventHandler = AgentEventHandler(PAYLOAD, CID, envVarGetter)
-
-    # Check that this is a user event and that it is intended for this container
-    if agentEventHandler.serfEventIs("user") and agentEventHandler.correctTarget():
-        eventName = agentEventHandler.getEnvVar("SERF_USER_EVENT")
-    print eventName
+    agentEventHandler = AgentEventHandler(PAYLOAD, CID, os.environ)
+    agentEventHandler.handleShit()
