@@ -61,6 +61,10 @@ class TestAgentEventHandler(unittest.TestCase):
 	def testEnvVarWithMockOsEnviron(self):
 		agentEventHandler = AgentEventHandler.AgentEventHandler(self.PAYLOAD_NO_TARGET, self.CID, MockOsEnviron.MockOsEnviron)
 		self.assertEqual("user", agentEventHandler.getEnvVar("SERF_EVENT"))
+		
+	def testSerfEventIs(self):
+		agentEventHandler = AgentEventHandler.AgentEventHandler(self.PAYLOAD_NO_TARGET, self.CID, MockOsEnviron.MockOsEnviron)
+		self.assertEqual(True, agentEventHandler.serfEventIs("user"))
 
 if __name__ == '__main__':
   unittest.main()
