@@ -79,8 +79,9 @@ class TestAgentEventHandler(unittest.TestCase):
                 self.PAYLOAD_WITH_TARGET, self.CID,
                 {"SERF_EVENT": "user", "SERF_USER_EVENT": "TEST_SET_MEMORY"})
             agentEventHandler.handleShit()
-            l.check((AgentEventHandler.__name__, 'INFO', 'Called'),
-                    (AgentEventHandler.__name__, 'INFO', 'Handling Event: TEST_SET_MEMORY'))
+            l.check((AgentEventHandler.__name__,
+                     'INFO',
+                     'Handling Event: TEST_SET_MEMORY'))
 
 if __name__ == '__main__':
     unittest.main()

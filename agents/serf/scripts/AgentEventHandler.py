@@ -49,12 +49,10 @@ class AgentEventHandler:
         return targetValue == self.getEnvVar("SERF_EVENT")
 
     def handleShit(self):
-        self.logger.info("Called")
-        # Check that this is a user event and that it is intended for this container
+        # Check we have a user event intended for this container
         if self.serfEventIs("user") and self.correctTarget():
             eventName = self.getEnvVar("SERF_USER_EVENT")
             self.logger.info("Handling Event: %s" % eventName)
-            print eventName
 
 
 if __name__ == '__main__':
