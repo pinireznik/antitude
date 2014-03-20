@@ -86,8 +86,20 @@ class TestAgentEventHandler(unittest.TestCase):
                 envVars={"SERF_EVENT": "user", "SERF_USER_EVENT": "TEST_SET_MEMORY"},
                 handlers={"TEST_SET_MEMORY": testMemoryHandler})
             agentEventHandler.handleShit()
-            log = str(l)
-            self.assertTrue("Called memory handler" in log)
+            self.checkLogMessages(l, 
+              "Processing user event: TEST_SET_MEMORY",
+              "Called memory handler",
+              "Processed")
 
+    def checkLogMessages(self, log, *messages):
+      log_str = str(log)
+      ind = 0
+      for m in messages:
+        try:
+          new_ind = log_str.index(m, ind) 
+          ind = new_ind + len(m)
+        except ValueError, e:
+          self.fail('Message "%s" did not appear in: \n %s' % (m, log_str[ind:-1]))
+  
 if __name__ == '__main__':
     unittest.main()
