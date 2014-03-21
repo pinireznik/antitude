@@ -1,20 +1,25 @@
 (function() {
 
-    var diameter = 960,
+    var diameter = 500,
         format = d3.format(",d"),
         color = d3.scale.category20c();
 
-    var bubble = d3.layout.pack()
-      .sort(null)
-      .size([diameter, diameter])
-      .padding(1.5)
-      .value(function (d) { return 100; });
 
+  var bubble = d3.layout.pack()
+    .sort(null)
+    .size([diameter, diameter])
+    .padding(4)
+    .value(function (d) { 
+        console.log("memory: " + d.memory);
+        return d.memory; });
+
+    var colors = { "alive": "green", "failed": "red"};
+/*
     var svg = d3.select("#node_graph").append("svg")
       .attr("width", diameter)
       .attr("height", diameter)
       .attr("class", "bubble");
-
+*/
     var connection = new autobahn.Connection({
         url: 'ws://127.0.0.1:5000/ws',
         realm: 'realm1'}
@@ -38,13 +43,16 @@
 
         for (var i = 0; i < json.members.length; i++) {
           var m = json.members[i];
-          if (!(m.name in nodes)) {
-            nodes[m.name] = {"addr": 0};
+
+          var id = "A" + m.addr.split(":")[0].replace(/\./g, "d");
+          if (!(id in nodes)) {
+            //Set a default value for memory
+            nodes[id] = {"memory": 20};
           }
-          nodes[m.name].addr = m.addr;
-          nodes[m.name].name = m.name; //Yes, I know
-          nodes[m.name].status = m.status;
-          nodes[m.name].id = "A" + m.addr.split(":")[0].replace(/\./g, "d");
+          nodes[id].addr = m.addr;
+          nodes[id].name = m.name; //Yes, I know
+          nodes[id].status = m.status;
+          nodes[id].id = "A" + m.addr.split(":")[0].replace(/\./g, "d");
         }
         //Should also delete any nodes that don't appear in list
 
@@ -58,12 +66,10 @@
             .attr("class", "table table-bordered table-condensed");
         tbody = table.append("tbody");
 
-        for (var name in nodes) {
-            var n = nodes[name];
-            var id = "A" + n.addr.split(":")[0].replace(/\./g, "d");
-            console.log("id " + id);
+        for (var id in nodes) {
+            var n = nodes[id];
             var tr = tbody.append("tr").attr("id", id);
-            tr.append("td").text(name);
+            tr.append("td").text(n.name);
             tr.append("td").text(n.addr);
             tr.append("td").text(n.status);
         }
@@ -79,17 +85,23 @@
     function getNodeArray() {
 
       children = [];
-      for (var name in nodes) {
-        children.push(nodes[name]);
+      for (var id in nodes) {
+        children.push(nodes[id]);
       }
       return children;
     }
 
     function updateGraph() {
 
+
+      var svg = d3.select("#node_graph").html("").append("svg")
+        .attr("width", diameter)
+        .attr("height", diameter)
+        .attr("class", "bubble");
+
       kids = getNodeArray();
       var node = svg.selectAll(".node")
-        .data(bubble.nodes({children: kids}))
+        .data(bubble.nodes({"children": kids}))
         .enter().append("g")
         .attr("class", "node")
         .attr("transform", function(d) { 
@@ -97,16 +109,37 @@
           return "translate(" + d.x + "," + d.y + ")"; });
 
       node.append("title")
-        .text(function(d) { return d.name + ": " + format(d.value); });
+        .text(function(d) { return d.addr + ": " + format(d.value); });
 
       node.append("circle")
         .attr("r", function(d) { return d.r; })
-        .style("fill", function(d) { return color(d.status); });
+        .style("fill", function(d) { 
+
+          if (d.status in colors) {
+            return colors[d.status];
+          } 
+            return "white";
+          });
 
       node.append("text")
         .attr("dy", ".3em")
         .style("text-anchor", "middle")
-        .text(function(d) { return d.addr; });
+        .text(function(d) { return d.name; });
+      bubble.sort();
+    }
+
+    function addrToId(addr) {
+      return "A" + addr.replace(/\./g, "d");
+    }
+
+    function extractArg(arg, string) {
+
+      var re = new RegExp(arg + "=(\\S*)");
+      res = re.exec(string);
+      if (res && res.length > 1) {
+        return  re.exec(string)[1];
+      }
+      return "";
     }
 
     connection.onopen = function (session) {
@@ -121,7 +154,7 @@
             for (var key in message) {
                 console.log("got key " + key);
                 if (key === "FIXING") {
-                    var target = "A" + message[key].replace(/\./g, "d");
+                    var target = addrToId(message[key]);
                     console.log("got fixing *" + target + "*");
                     d3.select("#" + target).classed("success", false);
                     d3.select("#" + target).classed("warning", true);
@@ -131,7 +164,19 @@
                     d3.select("#" + target).classed("success", true);
                 } else if (key === "NEWNODE") {
                     setTimeout(function() {
-                        d3.json("members", memberTable);}, 200);
+                        d3.json("members", updateNodes);}, 200);
+                } else if (key === "MEMORY_LEVEL") {
+                  var level = extractArg("LEVEL", message[key]);
+                  var target = extractArg("IP", message[key]);
+                  console.log("LEVEL= " + level + " IP= " + target);
+
+                  if (level !== "" && target !== "") {
+                    console.log("updating level for " + addrToId(target));
+                    nodes[addrToId(target)].memory = +level;
+                    updateMemberTable();
+                    updateGraph();
+                  }
+
                 }
             }
 
