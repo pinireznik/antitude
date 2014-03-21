@@ -5,4 +5,4 @@ echo RUNNING UNIT TESTS
 docker run uglyduckling.nl/serf ./TestAgentEventHandler.py
 
 echo RUNNING SYSTEM TESTS
-docker run uglyduckling.nl/serf ./testAgentEventHandler.sh
+# docker run uglyduckling.nl/serf ./testAgentEventHandler.sh
