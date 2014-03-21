@@ -1,5 +1,5 @@
 #!/bin/bash 
-LOG_FILE=logging/ui.log
+LOG_FILE=/tmp/logging/ui.log
 read PAYLOAD
 echo "`date '+%F %T'` Received user event ${SERF_USER_EVENT} with payload $PAYLOAD" >> $LOG_FILE
 
