@@ -14,6 +14,12 @@ echo "***** Starting up Skynet *****"
 echo
 ./restart.sh
 
+echo "Starting GUI"
+pushd ../ui
+./start.sh
+popd
+
+
 echo 
 echo "***** Adding 4 nodes *****"
 echo
