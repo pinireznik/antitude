@@ -67,7 +67,7 @@ def page_home():
 
 @app.route('/members')
 def get_members():
-    p = subprocess.Popen(['../../agent/docker/serf/serf members -format json'],
+    p = subprocess.Popen(['serf members -format json'],
                          shell=True,
                          stdout=subprocess.PIPE,
                          stderr=subprocess.STDOUT)
@@ -131,7 +131,8 @@ if __name__ == "__main__":
     ## create a Twisted Web Site and run everything
     ##
     site = Site(rootResource)
-    site.protocol = HTTPChannelHixie76Aware  # needed if Hixie76 is to be supported
+    # needed if Hixie76 is to be supported
+    site.protocol = HTTPChannelHixie76Aware
 
     reactor.listenTCP(5000, site)
     reactor.run()
