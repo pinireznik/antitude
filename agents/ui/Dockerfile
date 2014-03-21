@@ -5,7 +5,7 @@ MAINTAINER amouat "a.mouat@uglyduckling.nl"
 ADD app /app
 ADD ui-event-handler.sh /
 EXPOSE 5000
-RUN apt-get install -y python2.7-dev
+RUN apt-get install -y python2.7-dev curl
 RUN pip install flask
 RUN pip install twisted
 RUN pip install autobahn
