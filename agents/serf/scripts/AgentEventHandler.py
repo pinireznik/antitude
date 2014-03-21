@@ -12,9 +12,7 @@ BREAK_FILE = "/tmp/break.tmp"
 
 class AgentEventHandler:
 
-    def __init__(self, payload="", CID="", envVars={}, handlers={}):
-        if type(payload).__name__ != "str":
-            raise Exception("Payload must be of type string")
+    def __init__(self, payload=[], CID="", envVars={}, handlers={}):
         self.payload = payload
         self.CID = CID
         self.TARGET_STRING = "TARGET"
@@ -31,7 +29,7 @@ class AgentEventHandler:
 
     def getArgumentPair(self, argumentKey):
         if len(self.payload) > 0:
-            searchObj = re.search(r'%s=[^ ]*'	 % argumentKey, self.payload)
+            searchObj = re.search(r'%s=[^ ]*' % argumentKey, str(self.payload))
             if searchObj:
                 return searchObj.group()
 
@@ -54,6 +52,7 @@ class AgentEventHandler:
             #TARGET = ALL
             return True
 
+        self.logger.info("checked target: %s" % argumentPair)
         return self.getArgumentValue(argumentPair) == self.CID
 
     def serfEventIs(self, targetValue):
@@ -65,7 +64,8 @@ class AgentEventHandler:
             eventName = self.getEnvVar("SERF_USER_EVENT")
             if eventName in self.handlers:
                 self.logger.info(
-                    "Processing user event: %s with payload of %s" % (eventName, self.payload))
+                    "Processing user event: %s with payload of %s"
+                    % (eventName, self.payload))
                 self.handlers[eventName](eventName, self.payload)
                 self.logger.info("Processed.")
 
@@ -78,7 +78,7 @@ def memoryHandler(event, payload):
 
 def breakHandler(event, payload):
     if not os.path.exists(BREAK_FILE):
-        open('file', 'w').close()
+        open(BREAK_FILE, 'w').close()
 
 
 if __name__ == '__main__':
@@ -86,12 +86,16 @@ if __name__ == '__main__':
         os.mkdir('/tmp/logging')
 
     my_ip = socket.gethostbyname(socket.gethostname())
-    logging.basicConfig(filename='/tmp/logging/%s.log' % my_ip, level=logging.DEBUG)
-    payload = raw_input()
-    agentEventHandler = AgentEventHandler(payload=payload,
-                                          CID=SerfCID.getCID(),
-                                          envVars=os.environ,
-                                          handlers={"TEST_SET_MEMORY": memoryHandler})
+    logging.basicConfig(filename='/tmp/logging/%s.log'
+                        % my_ip, level=logging.DEBUG)
+    payload = sys.stdin.readlines()
+    agentEventHandler = AgentEventHandler(
+        payload=payload,
+        CID=SerfCID.getCID(),
+        envVars=os.environ,
+        handlers={"TEST_SET_MEMORY": memoryHandler,
+                  "TEST_BREAK_FILE": breakHandler})
+
     logging.info("Handling Shit %s " % payload)
 
     agentEventHandler.handleShit()
