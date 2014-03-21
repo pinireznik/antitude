@@ -3,6 +3,7 @@ MAINTAINER amouat "a.mouat@uglyduckling.nl"
 
 # Have some more python requirements
 ADD app /app
+ADD ui-event-handler.sh /
 EXPOSE 5000
 RUN apt-get install -y python2.7-dev
 RUN pip install flask
