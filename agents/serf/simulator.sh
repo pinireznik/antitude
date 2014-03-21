@@ -1,8 +1,4 @@
 #!/bin/bash
-INCREASING_LOAD_FILE=simulation/increasing_load.txt
-SLIGHT_DECREASE_LOAD_FILE=simulation/slight_decrease.txt
-DESCREAING_LOAD_FILE=simulation/decreasing_load.txt
-
 STEP_DELAY=5
 OLD_BOUNDARY=0
 
