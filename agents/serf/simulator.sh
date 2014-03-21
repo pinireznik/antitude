@@ -39,6 +39,7 @@ do
     
   for agent in 172.17.0.2 172.17.0.3 172.17.0.4 172.17.0.5
   do
+    mkdir -p simulation/$agent
     echo `shuf -i $OLD_BOUNDARY-$NEW_BOUNDARY -n 1` > simulation/$agent/memory.tmp
   done
   OLD_BOUNDARY=$NEW_BOUNDARY
