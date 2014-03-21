@@ -13,7 +13,10 @@
         console.log("memory: " + d.memory);
         return d.memory; });
 
-    var colors = { "alive": "green", "failed": "red"};
+    var colors = { "alive": "green", 
+                   "failed": "red",
+                   "fixing": "yellow",
+                   "fixed": "green"};
 /*
     var svg = d3.select("#node_graph").append("svg")
       .attr("width", diameter)
@@ -71,12 +74,22 @@
             var tr = tbody.append("tr").attr("id", id);
             tr.append("td").text(n.name);
             tr.append("td").text(n.addr);
+            tr.append("td").text(n.memory);
             tr.append("td").text(n.status);
+            if (n.status === "fixing") {
+              tr.classed("success", false);
+              tr.classed("warning", true);
+            } else if (n.status === "fixed") {
+              tr.classed("warning", false);
+              tr.classed("success", true);
+            }
+
         }
 
         var thead = table.append("thead");
         thead.append("th").text("Name");
         thead.append("th").text("Address");
+        thead.append("th").text("Memory");
         thead.append("th").text("Status");
 
     }
@@ -156,12 +169,14 @@
                 if (key === "FIXING") {
                     var target = addrToId(message[key]);
                     console.log("got fixing *" + target + "*");
-                    d3.select("#" + target).classed("success", false);
-                    d3.select("#" + target).classed("warning", true);
+                    nodes[target].status = "fixing";
+                    //d3.select("#" + target).classed("success", false);
+                    //d3.select("#" + target).classed("warning", true);
                 } else if (key === "FIXED") {
-                    var target = "A" + message[key].replace(/\./g, "d");
-                    d3.select("#" + target).classed("warning", false);
-                    d3.select("#" + target).classed("success", true);
+                    var target = addrToId(message[key]);
+                    nodes[target].status = "fixed";
+                    //d3.select("#" + target).classed("warning", false);
+                    //d3.select("#" + target).classed("success", true);
                 } else if (key === "NEWNODE") {
                     setTimeout(function() {
                         d3.json("members", updateNodes);}, 200);
@@ -173,11 +188,12 @@
                   if (level !== "" && target !== "") {
                     console.log("updating level for " + addrToId(target));
                     nodes[addrToId(target)].memory = +level;
-                    updateMemberTable();
-                    updateGraph();
                   }
 
                 }
+                //Assume always need to do this
+                updateMemberTable();
+                updateGraph();
             }
 
 
