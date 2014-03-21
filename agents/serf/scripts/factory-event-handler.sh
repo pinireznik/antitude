@@ -8,8 +8,8 @@ if [ "${SERF_USER_EVENT}" = "NEWNODE" ]; then
   HOSTNAME=`hostname`
   IP_ADDRESS=`./serf members | grep $HOSTNAME | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'`
   echo "`date '+%F %T'` Creating node and attaching to factory at $IP_ADDRESS" >> $LOG_FILE
-  CID=$(/usr/bin/docker run -e "FACTORY_IPADDRESS=$IP_ADDRESS" -e "EVENT_HANDLER=AgentEventHandler.py" -d -v `pwd`/logging:/tmp/logging uglyduckling.nl/serf)
-  NEWNODE_IP=`/usr/bin/docker inspect $CID | grep IPAddress | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'`i
+  CID=$(/usr/bin/docker run -e "FACTORY_IPADDRESS=$IP_ADDRESS" -e "EVENT_HANDLER=AgentEventHandler.py" -d -v `pwd`/logging:/tmp/logging -v `pwd`/simulation:/tmp/simulation uglyduckling.nl/serf)
+  NEWNODE_IP=`/usr/bin/docker inspect $CID | grep IPAddress | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'`
   echo "`date '+%F %T'` Created new node with CID: $CID and public IP: $NEWNODE_IP" >> $LOG_FILE
   ./serf event NODECREATED $CID $NEWNODE_IP
 elif [ "${SERF_USER_EVENT}" = "REMOVENODE" ]; then
@@ -17,12 +17,6 @@ elif [ "${SERF_USER_EVENT}" = "REMOVENODE" ]; then
   /usr/bin/docker kill $PAYLOAD
   /usr/bin/docker rm $PAYLOAD
   ./serf force-leave $PAYLOAD
-elif [ "${SERF_USER_EVENT}" = "FIXED" ]; then
-  echo "`date '+%F %T'` fixed agent $PAYLOAD" >> $LOG_FILE
-  # writing to the test file
-  echo "$PAYLOAD ${SERF_USER_EVENT}" >> $TEST_FILE
-elif [ "${SERF_USER_EVENT}" = "MEMORY" ]; then
-  echo "`date '+%F %T'` memory use on agent $PAYLOAD" >> $LOG_FILE
 fi
 echo "`date '+%F %T'` ${SERF_USER_LTIME} ${SERF_EVENT} ${SERF_USER_EVENT} PAYLOAD=${PAYLOAD}" >> $LOG_FILE
 
