@@ -20,6 +20,8 @@
         realm: 'realm1'}
         );
 
+    var nodes = {};
+
     function logMessage(message) {
 
         for (var key in message) {
@@ -27,25 +29,43 @@
         }
 
     }
-    function memberTable(error, json) {
+
+    function updateNodes(error, json) {
+
         if (error) {
             return console.warn(error);
         }
-        console.log("JSON: " + json);
-        console.log("member0: " + json.members[0].name);
+
+        for (var i = 0; i < json.members.length; i++) {
+          var m = json.members[i];
+          if (!(m.name in nodes)) {
+            nodes[m.name] = {"addr": 0};
+          }
+          nodes[m.name].addr = m.addr;
+          nodes[m.name].name = m.name; //Yes, I know
+          nodes[m.name].status = m.status;
+          nodes[m.name].id = "A" + m.addr.split(":")[0].replace(/\./g, "d");
+        }
+        //Should also delete any nodes that don't appear in list
+
+        updateMemberTable();
+        updateGraph();
+    }
+
+    function updateMemberTable() {
 
         var table = d3.select("#node_table").html("").append("table")
             .attr("class", "table table-bordered table-condensed");
         tbody = table.append("tbody");
 
-        for (var i = 0; i < json.members.length; i++) {
-            var m = json.members[i];
-            var id = "A" + m.addr.split(":")[0].replace(/\./g, "d");
+        for (var name in nodes) {
+            var n = nodes[name];
+            var id = "A" + n.addr.split(":")[0].replace(/\./g, "d");
             console.log("id " + id);
             var tr = tbody.append("tr").attr("id", id);
-            tr.append("td").text(m.name);
-            tr.append("td").text(m.addr);
-            tr.append("td").text(m.status);
+            tr.append("td").text(name);
+            tr.append("td").text(n.addr);
+            tr.append("td").text(n.status);
         }
 
         var thead = table.append("thead");
@@ -53,15 +73,23 @@
         thead.append("th").text("Address");
         thead.append("th").text("Status");
 
-        memberGraph(json);
     }
 
-    function memberGraph(json) {
+    //Change this to be function on nodes
+    function getNodeArray() {
 
-      console.log("In member graph");
-      console.log(json.members);
+      children = [];
+      for (var name in nodes) {
+        children.push(nodes[name]);
+      }
+      return children;
+    }
+
+    function updateGraph() {
+
+      kids = getNodeArray();
       var node = svg.selectAll(".node")
-        .data(bubble.nodes({children: json.members}))
+        .data(bubble.nodes({children: kids}))
         .enter().append("g")
         .attr("class", "node")
         .attr("transform", function(d) { 
@@ -79,9 +107,7 @@
         .attr("dy", ".3em")
         .style("text-anchor", "middle")
         .text(function(d) { return d.addr; });
-
     }
-
 
     connection.onopen = function (session) {
 
@@ -124,7 +150,7 @@
     connection.open();
 
 
-    d3.json("members", memberTable);
+    d3.json("members", updateNodes);
 
     
     d3.select(self.frameElement).style("height", diameter + "px");
