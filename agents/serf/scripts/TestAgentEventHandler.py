@@ -4,6 +4,7 @@ import unittest
 import os
 import logging
 from testfixtures import LogCapture
+import subprocess
 
 
 class TestAgentEventHandler(unittest.TestCase):
@@ -121,6 +122,13 @@ class TestAgentEventHandler(unittest.TestCase):
             except ValueError:
                 self.fail('Message "%s" did not appear in: \n %s'
                           % (m, log_str[ind:-1]))
+
+    def testCommandLineCall(self):
+        #Check what happens when we replicate a serf call
+        subprocess.check_call(["python", "AgentEventHandler.py"],
+                              env={"SERF_EVENT": "user",
+                                   "SERF_USER_EVENT": "TEST_SET_MEMORY"})
+
 
 if __name__ == '__main__':
     unittest.main()
