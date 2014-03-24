@@ -1,0 +1,4 @@
+rect{
+  fill: white;
+}
+docker run -e FACTORY_IPADDRESS=10.0.2.15 -e EVENT_HANDLER=ui-event-handler.sh -d -v `pwd`/logging:/tmp/logging -p 5000:5000 uglyduckling.nl/ui
