@@ -1,2 +1,3 @@
 #!/bin/bash
-rm -v logging/*
+rm -fv logging/*
+rm -rf simulation/*

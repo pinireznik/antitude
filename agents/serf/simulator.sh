@@ -8,17 +8,26 @@ echo "***** Resetting the memory files *****"
 echo
 find simulation/ -type d -name "172*" -exec rm -fv {}/memory.tmp \;
 
+
+echo
+echo "***** Cleanning up *****"
+echo
+./killeverything.sh
+./deletelogs.sh
+
+
 # Start up the system
 echo
 echo "***** Starting up Skynet *****"
 echo
 ./restart.sh
 
-echo "Starting GUI"
-pushd ../ui
-./start.sh
-popd
-
+echo 
+echo "***** Adding UI node *****"
+echo
+sleep 2
+./serf event NEWUINODE
+sleep 3
 
 echo 
 echo "***** Adding 4 nodes *****"
@@ -32,6 +41,12 @@ sleep 3
 ./serf event NEWNODE
 sleep 3
 ./serf event NEWNODE
+sleep 3
+
+echo 
+echo "***** Breacking all functional agents *****"
+echo
+./serf event TEST_BREAK_FILE
 sleep 3
 
 echo
@@ -90,7 +105,7 @@ echo
 echo "***** Reducing the load on all nodes *****"
 echo
 # Now reduce the load on all nodes
-for BOUNDARY in 70 50 40 20 10 0
+for BOUNDARY in 70 40 20
 do
   sleep $STEP_DELAY
   NEW_BOUNDARY=$BOUNDARY
@@ -106,3 +121,4 @@ done
 echo
 echo "***** Removing a node *****"
 echo
+serf event REMOVENODE `serf members -status=alive -role=functional_agent | head -1 | cut -c1-12`
