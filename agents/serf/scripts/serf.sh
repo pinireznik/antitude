@@ -24,6 +24,14 @@ if [ -n $FACTORY_IPADDRESS ]; then
   JOIN_STRING="-join $FACTORY_IPADDRESS"
 fi
 
-serf agent $JOIN_STRING -event-handler=`pwd`/$EVENT_HANDLER -role=functional_agent >> $LOG_FILE
+# Check if role is set and if so define the right role string
+if [ -z $AGENT_ROLE ]; then
+  AGENT_ROLE="functional_agent"
+  echo "Assigning default role: ${AGENT_ROLE}"
+else
+  echo "Found Role: $AGENT_ROLE" >> $LOG_FILE
+fi
+
+serf agent $JOIN_STRING -event-handler=`pwd`$EVENT_HANDLER -role=${AGENT_ROLE} >> $LOG_FILE
 
 

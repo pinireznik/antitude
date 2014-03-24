@@ -8,17 +8,26 @@ echo "***** Resetting the memory files *****"
 echo
 find simulation/ -type d -name "172*" -exec rm -fv {}/memory.tmp \;
 
+
+echo
+echo "***** Cleanning up *****"
+echo
+./killeverything.sh
+./deletelogs.sh
+
+
 # Start up the system
 echo
 echo "***** Starting up Skynet *****"
 echo
 ./restart.sh
 
-echo "Starting GUI"
-pushd ../ui
-./start.sh
-popd
-
+echo 
+echo "***** Adding UI node *****"
+echo
+sleep 2
+./serf event NEWUINODE
+sleep 3
 
 echo 
 echo "***** Adding 4 nodes *****"
@@ -32,6 +41,12 @@ sleep 3
 ./serf event NEWNODE
 sleep 3
 ./serf event NEWNODE
+sleep 3
+
+echo 
+echo "***** Breacking all functional agents *****"
+echo
+./serf event TEST_BREAK_FILE
 sleep 3
 
 echo
