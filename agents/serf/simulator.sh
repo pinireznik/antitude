@@ -105,7 +105,7 @@ echo
 echo "***** Reducing the load on all nodes *****"
 echo
 # Now reduce the load on all nodes
-for BOUNDARY in 70 50 40 20 10 0
+for BOUNDARY in 70 40 20
 do
   sleep $STEP_DELAY
   NEW_BOUNDARY=$BOUNDARY
@@ -121,3 +121,4 @@ done
 echo
 echo "***** Removing a node *****"
 echo
+serf event REMOVENODE `serf members -status=alive -role=functional_agent | head -1 | cut -c1-12`
