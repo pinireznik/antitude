@@ -1,21 +1,3 @@
-###############################################################################
-##
-##  Copyright (C) 2012-2013 Tavendo GmbH
-##
-##  Licensed under the Apache License, Version 2.0 (the "License");
-##  you may not use this file except in compliance with the License.
-##  You may obtain a copy of the License at
-##
-##      http://www.apache.org/licenses/LICENSE-2.0
-##
-##  Unless required by applicable law or agreed to in writing, software
-##  distributed under the License is distributed on an "AS IS" BASIS,
-##  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-##  See the License for the specific language governing permissions and
-##  limitations under the License.
-##
-###############################################################################
-
 import uuid
 import sys
 import subprocess
@@ -36,6 +18,7 @@ from autobahn.twisted.websocket import WampWebSocketServerFactory
 from autobahn.wamp.router import RouterFactory
 
 
+#Autobahn websocker class
 class MessagePublisher(ApplicationSession):
     """
     Publishes recieved messages to all listeners
@@ -52,9 +35,7 @@ class MessagePublisher(ApplicationSession):
         self.publish('mitosis.event', "%s" % message)
 
 
-##
-## Our WSGI application .. in this case Flask based
-##
+## Flask app
 app = Flask(__name__)
 app.secret_key = str(uuid.uuid4())
 comp = MessagePublisher()
@@ -132,7 +113,7 @@ if __name__ == "__main__":
     ##
     site = Site(rootResource)
     # needed if Hixie76 is to be supported
-    site.protocol = HTTPChannelHixie76Aware
+    #site.protocol = HTTPChannelHixie76Aware
 
     reactor.listenTCP(5000, site)
     reactor.run()
