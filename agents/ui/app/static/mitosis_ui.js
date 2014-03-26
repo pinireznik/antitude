@@ -4,17 +4,15 @@
 (function() {
     "use strict";
     /* TODO:
-     *  - show dependent nodes
      *  - keep up with messages
      *    - cljs?
      *  - tidy up
      *  - add window size to log
+     *  - listen for left somehow
      *  - can just use nodes and get rid of g_nodes I think
-     *  - sizing issues
-     *  - use colour scheme
      *  - be nice to separate base Serf functionality
      *  - need ordering/some way of telling story
-     *  - figure out better dev flow
+     *    - show dependent nodes
      */
     var w = 960,
         h = 500;
@@ -30,10 +28,11 @@
         .nodes(g_nodes)
         .size([w, h]);
 
-    var colors = { "alive": "green", 
-                   "failed": "red",
-                   "fixing": "yellow",
-                   "fixed": "green",
+    var started = false;
+    var colors = { "alive": "#5cb85c", 
+                   "failed": "#d9534f",
+                   "fixing": "#f0ad4e",
+                   "fixed": "#5cb85c",
                    "leaving": "gray"};
 
     force.start();
@@ -68,12 +67,15 @@
             .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")";});
 
         svg.selectAll("circle")
-           .attr("r", function(n) { return n.memory - 2; }) // -2 creates border
+           .attr("r", function(n) { return n.radius - 2; }) // -2 creates border
            .style("fill", function(n) {return colors[n.status];});
+
+        svg.selectAll("text")
+            .text(function(d) { return d.role.substring(0,1); });
     });
 
     function collide(node) {
-        var r = node.memory + 16,
+        var r = node.radius + 16,
             nx1 = node.x - r,
             nx2 = node.x + r,
             ny1 = node.y - r,
@@ -84,7 +86,7 @@
                 var x = node.x - quad.point.x,
                     y = node.y - quad.point.y,
                     l = Math.sqrt(x * x + y * y),
-                    r = node.memory + quad.point.memory;
+                    r = node.radius + quad.point.radius;
                 if (l < r) {
                     l = (l - r) / l * 0.5;
                     node.px += x * l;
@@ -130,10 +132,16 @@
                 add = true;
             }
             nodes[id].addr = m.addr;
+            nodes[id].radius = 8 + nodes[id].memory / 2;
             nodes[id].name = m.name; //Yes, I know
             nodes[id].status = m.status;
             nodes[id].id = "A" + m.addr.split(":")[0].replace(/\./g, "d");
-            nodes[id].role = m.tags.role;
+            if (m.tags.role) {
+                nodes[id].role = m.tags.role;
+            } else {
+                nodes[id].role = "?";
+            }
+
             if (add) {
                 addGraphNode(nodes[id]);
             }
@@ -209,21 +217,17 @@
 
         var g = svg.append("svg:g")
             .data([n])
+            .attr("id", n.id)
             .attr("class", "node")
             .attr("transform", function (n) { return "translate(" + n.x + "," + n.y + ")";});
         var circ = g.append("svg:circle")
             .data([n])
-            .attr("id", n.id)
-            //.attr("cx", function(n) { return +n.x; })
-            //.attr("cy", function(n) { return +n.y; })
-            .attr("r", function(n) { return n.memory - 2; }) // -2 creates border
+            .attr("r", function(n) { return n.radius - 2; }) // -2 creates border
             .style("fill", function(n) {return colors[n.status];});
         circ.append("svg:title")
             .text(function(d) { return d.addr; });
         g.append("text")
             .data([n])
-            //.attr("x", function(n) { return +n.x; })
-            //.attr("y", function(n) { return +n.y; })
             .attr("dy", ".3em")
             .style("text-anchor", "middle")
             .text(function(d) { return d.role.substring(0,1); });
@@ -272,15 +276,11 @@
                         nodes[target].status = "fixing";
                         updateMemberTable();
                         updateGraph();
-                        //d3.select("#" + target).classed("success", false);
-                        //d3.select("#" + target).classed("warning", true);
                     } else if (key === "FIXED") {
                         var target = addrToId(message[key]);
                         nodes[target].status = "fixed";
                         updateMemberTable();
                         updateGraph();
-                        //d3.select("#" + target).classed("warning", false);
-                        //d3.select("#" + target).classed("success", true);
                     } else if (key === "NEWNODE" || key === "REMOVENODE") {
                         setTimeout(updateNodesFunc, 500);
                     } else if (key === "MEMORY_LEVEL") {
@@ -291,6 +291,7 @@
                             var ilevel = +level;
                             if (ilevel !== nodes[addrToId(target)].memory) {
                                 nodes[addrToId(target)].memory = ilevel;
+                                nodes[addrToId(target)].radius = 8 + ilevel/2;
                                 updateMemberTable();
                                 updateGraph();
                             }
