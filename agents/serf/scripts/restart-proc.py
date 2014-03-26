@@ -14,9 +14,11 @@ FIXED_STRING		      = "event FIXED " + IP_ADDRESS
 LOG_FILE		          = "/tmp/logging/" + IP_ADDRESS + ".log"
 SIMULATION_DIRECTORY  = "/tmp/simulation/" + IP_ADDRESS
 MEMORY_FILE		        = SIMULATION_DIRECTORY + "/memory.tmp"
+LAST_MEM = None
 
 while True:
     time.sleep(1)
+    memory_use = None
     if os.path.isfile(FILENAME_BREAK):
         try:
             print "Restarting service and removing " + FILENAME_BREAK
@@ -43,4 +45,8 @@ while True:
         with open(MEMORY_FILE, 'r') as f:
             memory_use = f.readline().rstrip()
             print "Memory use: " + memory_use
-        call(["serf", "event", "-coalesce=false", "MEMORY_LEVEL", "MEMORY_LEVEL=%s IP=%s" % (memory_use, IP_ADDRESS)])
+        if LAST_MEM != memory_use:
+            print "Memory use changed, sending event"
+            call(["serf", "event", "-coalesce=false", "MEMORY_LEVEL", "MEMORY_LEVEL=%s IP=%s" % (memory_use, IP_ADDRESS)])
+    global LAST_MEM
+    LAST_MEM = memory_use 
