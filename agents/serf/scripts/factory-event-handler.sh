@@ -31,6 +31,12 @@ elif [ "${SERF_USER_EVENT}" = "REMOVENODE" ]; then
   /usr/bin/docker kill $PAYLOAD
   /usr/bin/docker rm $PAYLOAD
   ./serf force-leave $PAYLOAD
+elif [ "${SERF_USER_EVENT}" = "MEMORY_LEVEL" ]; then
+  echo" DEBUG: Creating temporary resman node" >> $LOG_FILE
+  CID=$(/usr/bin/docker run -t -i -e "AGENT_ROLE=resman" -e "FACTORY_IPADDRESS=$IP_ADDRESS" -e "EVENT_HANDLER=AgentEventHandler.py" -d -v `pwd`/logging:/tmp/logging -v `pwd`/simulation:/tmp/simulation -v `pwd`/configs:/tmp/configs uglyduckling.nl/resman)
+  NEWNODE_IP=`/usr/bin/docker inspect $CID | grep IPAddress | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'`
+  echo "`date '+%F %T'` Created new node with CID: $CID and public IP: $NEWNODE_IP" >> $LOG_FILE
+  ./serf event NODECREATED $CID $NEWNODE_IP
 fi
 echo "`date '+%F %T'` ${SERF_USER_LTIME} ${SERF_EVENT} ${SERF_USER_EVENT} PAYLOAD=${PAYLOAD}" >> $LOG_FILE
 
