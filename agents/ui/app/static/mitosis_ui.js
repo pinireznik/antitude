@@ -7,7 +7,6 @@
      *  - keep up with messages
      *    - cljs?
      *  - tidy up
-     *  - add window size to log
      *  - listen for left somehow
      *  - can just use nodes and get rid of g_nodes I think
      *  - be nice to separate base Serf functionality
@@ -109,8 +108,12 @@
         for (var key in message) {
             //Make sure avoid anything in prototype
             if (message.hasOwnProperty(key)) {
-                $("#message_log").append(key + " " + message[key] + "<br/>");
+                $("#message_log").append("<p>" + key + " " + message[key] + "</p>");
             }
+        }
+        while ($("#message_log p").length > 5) {
+            console.log("more than 5");
+            $("#message_log p")[0].remove();
         }
 
     }
