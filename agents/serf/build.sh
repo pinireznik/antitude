@@ -1,2 +1,5 @@
-# build base ubuntu with serf agent
-docker build -t uglyduckling.nl/serf .
+#!/bin/bash
+
+pushd ..
+./build.sh serf
+popd

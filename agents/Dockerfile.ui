@@ -1,0 +1,19 @@
+FROM uglyduckling.nl/serf-base
+MAINTAINER amouat "a.mouat@uglyduckling.nl"
+
+ADD /serf/serf /usr/local/bin/serf
+
+ADD /serf/supervisor_conf /etc/supervisor/conf.d
+ADD /serf/scripts /
+
+# Have some more python requirements
+RUN apt-get install -y python2.7-dev curl
+RUN pip install flask twisted autobahn
+ADD /ui/app /app
+ADD /ui/ui-event-handler.sh /
+#RUN pip install -r /tmp/requirements.txt
+
+# Run wrapper for serf (is this already getting run?
+ADD scripts/ /
+EXPOSE 5000
+CMD bash /init.sh
