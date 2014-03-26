@@ -22,7 +22,7 @@ if [ "${SERF_USER_EVENT}" = "NEWNODE" ] || [ "${SERF_USER_EVENT}" = "NEWUINODE" 
   done
   IP_ADDRESS=`./serf members | grep $HOSTNAME | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'`
   echo "`date '+%F %T'` Creating node with role $ROLE and attaching to factory at $IP_ADDRESS" >> $LOG_FILE
-  CID=$(/usr/bin/docker run -e "AGENT_PARENT=$parent" -e "AGENT_ROLE=$role" -e "FACTORY_IPADDRESS=$IP_ADDRESS" -e "EVENT_HANDLER=${EVENT_HANDLER}" -d -v `pwd`/logging:/tmp/logging -v `pwd`/simulation:/tmp/simulation -v `pwd`/configs:/tmp/configs ${DOCKER_PORT_EXPOSE} ${DOCKER_IMAGE} bash /serf.sh)
+  CID=$(/usr/bin/docker run -e "AGENT_PARENT=$parent" -e "AGENT_ROLE=$role" -e "FACTORY_IPADDRESS=$IP_ADDRESS" -e "EVENT_HANDLER=${EVENT_HANDLER}" -d -v `pwd`/logging:/tmp/logging -v `pwd`/simulation:/tmp/simulation -v `pwd`/configs:/tmp/configs ${DOCKER_PORT_EXPOSE} ${DOCKER_IMAGE})
   NEWNODE_IP=`/usr/bin/docker inspect $CID | grep IPAddress | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'`
   echo "`date '+%F %T'` Created new node with CID: $CID and public IP: $NEWNODE_IP" >> $LOG_FILE
   ./serf event NODECREATED $CID $NEWNODE_IP
