@@ -27,11 +27,24 @@ fi
 # Check if role is set and if so define the right role string
 if [ -z $AGENT_ROLE ]; then
   AGENT_ROLE="functional_agent"
-  echo "Assigning default role: ${AGENT_ROLE}"
+  echo "Assigning default role: ${AGENT_ROLE}" >> $LOG_FILE
 else
-  echo "Found Role: $AGENT_ROLE" >> $LOG_FILE
+  echo "Found role: $AGENT_ROLE" >> $LOG_FILE
 fi
 
-serf agent $JOIN_STRING -event-handler=`pwd`$EVENT_HANDLER -role=${AGENT_ROLE} >> $LOG_FILE
 
+serf agent $JOIN_STRING -event-handler=`pwd`$EVENT_HANDLER -role=${AGENT_ROLE} >> $LOG_FILE &
 
+if [ -e /tmp/configs/$AGENT_ROLE.cfg ]; then
+  echo "Config file found for role $AGENT_ROLE" >> $LOG_FILE
+  deps=$(cat /tmp/configs/$AGENT_ROLE.cfg | grep deps | cut -d "=" -f 2 | tr ";" "\n")
+  for dep in $deps
+  do
+    echo "Requesting dependency: $dep" >> $LOG_FILE
+    serf event -coalesce=false NEWNODE role=$dep
+  done
+fi
+
+while [ true ]; do
+  sleep 1
+done

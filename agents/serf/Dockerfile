@@ -24,4 +24,4 @@ RUN pip install -r /tmp/requirements.txt
 EXPOSE 7946
 
 # Run wrapper for serf
-CMD bash /serf.sh
+#CMD bash /serf.sh
