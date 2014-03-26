@@ -9,16 +9,13 @@ from twisted.web.wsgi import WSGIResource
 
 from flask import Flask, render_template, request, Response
 
-from autobahn.twisted.resource import (WebSocketResource,
-                                       WSGIRootResource,
-                                       HTTPChannelHixie76Aware)
-
+from autobahn.twisted.resource import WebSocketResource, WSGIRootResource
 from autobahn.twisted.wamp import ApplicationSession, RouterSessionFactory
 from autobahn.twisted.websocket import WampWebSocketServerFactory
 from autobahn.wamp.router import RouterFactory
 
 
-#Autobahn websocker class
+#Autobahn WAMP class
 class MessagePublisher(ApplicationSession):
     """
     Publishes recieved messages to all listeners
@@ -112,8 +109,6 @@ if __name__ == "__main__":
     ## create a Twisted Web Site and run everything
     ##
     site = Site(rootResource)
-    # needed if Hixie76 is to be supported
-    #site.protocol = HTTPChannelHixie76Aware
 
     reactor.listenTCP(5000, site)
     reactor.run()

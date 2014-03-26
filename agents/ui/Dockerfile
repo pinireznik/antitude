@@ -9,6 +9,6 @@ ADD ui-event-handler.sh /
 #RUN pip install -r /tmp/requirements.txt
 
 # Run wrapper for serf (is this already getting run?
-ADD scripts/init.sh /init.sh
+ADD scripts/ /
 EXPOSE 5000
 CMD bash /init.sh
