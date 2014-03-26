@@ -1,14 +1,15 @@
 FROM uglyduckling.nl/serf-base
 MAINTAINER amouat "a.mouat@uglyduckling.nl"
 
-ADD /serf/serf /usr/local/bin/serf
-
-ADD /serf/supervisor_conf /etc/supervisor/conf.d
-ADD /serf/scripts /
-
 # Have some more python requirements
 RUN apt-get install -y python2.7-dev curl
 RUN pip install flask twisted autobahn
+
+
+ADD /serf/serf /usr/local/bin/serf
+ADD /serf/supervisor_conf /etc/supervisor/conf.d
+ADD /serf/scripts /
+
 ADD /ui/app /app
 ADD /ui/ui-event-handler.sh /
 #RUN pip install -r /tmp/requirements.txt
