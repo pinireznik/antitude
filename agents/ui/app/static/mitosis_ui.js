@@ -4,7 +4,6 @@
 (function() {
     "use strict";
     /* TODO:
-     *  - remove failed nodes
      *  - show dependent nodes
      *  - keep up with messages
      *    - cljs?
@@ -14,6 +13,8 @@
      *  - sizing issues
      *  - use colour scheme
      *  - be nice to separate base Serf functionality
+     *  - need ordering/some way of telling story
+     *  - figure out better dev flow
      */
     var w = 960,
         h = 500;
@@ -22,7 +23,6 @@
         midy = Math.floor(h/2);
 
     var g_nodes = [];
-    var color = d3.scale.category10();
 
     var force = d3.layout.force()
         .gravity(0)
@@ -33,7 +33,8 @@
     var colors = { "alive": "green", 
                    "failed": "red",
                    "fixing": "yellow",
-                   "fixed": "green"};
+                   "fixed": "green",
+                   "leaving": "gray"};
 
     force.start();
 
@@ -45,12 +46,6 @@
         .attr("width", w)
         .attr("height", h);
 
-    svg.selectAll("circle")
-        .data(g_nodes)
-        .enter().append("svg:circle")
-          .attr("r", function(d) { return d.memory - 2; })
-          .style("fill", function(d, i) { return color[d.status]; });
-
     force.on("tick", function(e) {
         var q = d3.geom.quadtree(g_nodes),
             k = e.alpha * 0.1,
@@ -58,7 +53,7 @@
             n = g_nodes.length,
             o;
 
-        for (i=0; i<g_nodes.length; i++) {
+        for (i=0; i<n; i++) {
             o = g_nodes[i];
             if (o.fixed) {
                 continue;
@@ -69,15 +64,12 @@
             q.visit(collide(o));
         }
 
-        //should change this to be one group element
+        svg.selectAll(".node")
+            .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")";});
+
         svg.selectAll("circle")
-           .attr("cx", function(d) { return d.x; })
-           .attr("cy", function(d) { return d.y; })
            .attr("r", function(n) { return n.memory - 2; }) // -2 creates border
            .style("fill", function(n) {return colors[n.status];});
-        svg.selectAll("text")
-           .attr("x", function(d) { return d.x; })
-           .attr("y", function(d) { return d.y; });
     });
 
     function collide(node) {
@@ -145,6 +137,9 @@
             if (add) {
                 addGraphNode(nodes[id]);
             }
+            if (nodes[id].status === "left") {
+                removeGraphNode(nodes[id]);
+            }
         }
         //Should also delete any nodes that don't appear in list
 
@@ -198,23 +193,37 @@
         return children;
     }
 
+    function removeGraphNode(n) {
+        var ind = g_nodes.indexOf(n);
+        if (ind !== -1) {
+            g_nodes.splice(ind, 1);
+        }
+        d3.select("#" + n.id).remove();
+
+    }
+
     function addGraphNode(n) {
 
         n.x = Math.floor(Math.random() * w);
         n.y = Math.floor(Math.random() * w);
 
-        var circ = svg.append("svg:circle")
+        var g = svg.append("svg:g")
             .data([n])
-            .attr("cx", function(n) { return +n.x; })
-            .attr("cy", function(n) { return +n.y; })
+            .attr("class", "node")
+            .attr("transform", function (n) { return "translate(" + n.x + "," + n.y + ")";});
+        var circ = g.append("svg:circle")
+            .data([n])
+            .attr("id", n.id)
+            //.attr("cx", function(n) { return +n.x; })
+            //.attr("cy", function(n) { return +n.y; })
             .attr("r", function(n) { return n.memory - 2; }) // -2 creates border
             .style("fill", function(n) {return colors[n.status];});
-         circ.append("svg:title")
+        circ.append("svg:title")
             .text(function(d) { return d.addr; });
-         svg.append("text")
+        g.append("text")
             .data([n])
-            .attr("x", function(n) { return +n.x; })
-            .attr("y", function(n) { return +n.y; })
+            //.attr("x", function(n) { return +n.x; })
+            //.attr("y", function(n) { return +n.y; })
             .attr("dy", ".3em")
             .style("text-anchor", "middle")
             .text(function(d) { return d.role.substring(0,1); });
@@ -272,7 +281,7 @@
                         updateGraph();
                         //d3.select("#" + target).classed("warning", false);
                         //d3.select("#" + target).classed("success", true);
-                    } else if (key === "NEWNODE") {
+                    } else if (key === "NEWNODE" || key === "REMOVENODE") {
                         setTimeout(updateNodesFunc, 500);
                     } else if (key === "MEMORY_LEVEL") {
                         var level = extractArg("LEVEL", message[key]);
