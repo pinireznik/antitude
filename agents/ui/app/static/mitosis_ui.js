@@ -3,24 +3,24 @@
 /* global $ */
 (function() {
     "use strict";
+    /* TODO:
+     *  - remove failed nodes
+     *  - show dependent nodes
+     *  - keep up with messages
+     *    - cljs?
+     *  - tidy up
+     *  - add window size to log
+     *  - can just use nodes and get rid of g_nodes I think
+     *  - sizing issues
+     *  - use colour scheme
+     *  - be nice to separate base Serf functionality
+     */
     var w = 960,
         h = 500;
 
     var midx = Math.floor(w/2),
         midy = Math.floor(h/2);
 
-
-    /*
-    var g_nodes = d3.range(5).map(function(i) {
-        return {//type: Math.random() * 5 | 0,
-                radius: 30,
-                fixed:true,
-                type:i,
-                x: (i+1) * (w / 6),
-                y: h / 2
-            };
-    });
-    */
     var g_nodes = [];
     var color = d3.scale.category10();
 
@@ -69,44 +69,16 @@
             q.visit(collide(o));
         }
 
+        //should change this to be one group element
         svg.selectAll("circle")
            .attr("cx", function(d) { return d.x; })
            .attr("cy", function(d) { return d.y; })
            .attr("r", function(n) { return n.memory - 2; }) // -2 creates border
            .style("fill", function(n) {return colors[n.status];});
+        svg.selectAll("text")
+           .attr("x", function(d) { return d.x; })
+           .attr("y", function(d) { return d.y; });
     });
-
-    //var p0;
-    /*
-    svg.on("mousemove", function() {
-        var p1 = d3.mouse(this),
-        node = {
-            radius:Math.random() * 12 + 4, 
-            type: Math.random() * 5 | 0, 
-            x: p1[0], 
-            y: p1[1], 
-            px: (p0 || (p0 = p1))[0], 
-            py: p0[1]
-        };
-
-        p0 = p1;
-
-        svg.append("svg:circle")
-            .data([node])
-            .attr("cx", function(d) { return d.x; })
-            .attr("cy", function(d) { return d.y; })
-            .attr("r", function(d) { return d.radius - 2; })
-            .style("fill", function(d) {return color(d.type);})
-            .transition()
-            .delay(3000)
-            .attr("r", 1e-6)
-            .each("end", function() { g_nodes.splice(6, 1); })
-            .remove();
-
-        g_nodes.push(node);
-        force.resume();
-    });
-    */
 
     function collide(node) {
         var r = node.memory + 16,
@@ -131,31 +103,6 @@
         };
     }
 
-  /*
-  var diameter = 500,
-      format = d3.format(",d"),
-      color = d3.scale.category20c();
-
-
-  var bubble = d3.layout.pack()
-    .sort(null)
-    .size([diameter, diameter])
-    .padding(4)
-    .value(function (d) { 
-        console.log("memory: " + d.memory);
-        return d.memory; });
-
-    var colors = { "alive": "green", 
-                   "failed": "red",
-                   "fixing": "yellow",
-                   "fixed": "green"};
-                   */
-/*
-    var svg = d3.select("#node_graph").append("svg")
-      .attr("width", diameter)
-      .attr("height", diameter)
-      .attr("class", "bubble");
-*/
     var connection = new autobahn.Connection({
         url: 'ws://127.0.0.1:5000/ws',
         realm: 'realm1'
@@ -194,6 +141,7 @@
             nodes[id].name = m.name; //Yes, I know
             nodes[id].status = m.status;
             nodes[id].id = "A" + m.addr.split(":")[0].replace(/\./g, "d");
+            nodes[id].role = m.tags.role;
             if (add) {
                 addGraphNode(nodes[id]);
             }
@@ -217,6 +165,7 @@
                 tr.append("td").text(n.name);
                 tr.append("td").text(n.addr);
                 tr.append("td").text(n.memory);
+                tr.append("td").text(n.role);
                 tr.append("td").text(n.status);
                 if (n.status === "fixing") {
                     tr.classed("success", false);
@@ -226,13 +175,13 @@
                     tr.classed("success", true);
                 }
             }
-
         }
 
         var thead = table.append("thead");
         thead.append("th").text("Name");
         thead.append("th").text("Address");
         thead.append("th").text("Memory");
+        thead.append("th").text("Role");
         thead.append("th").text("Status");
 
     }
@@ -254,15 +203,21 @@
         n.x = Math.floor(Math.random() * w);
         n.y = Math.floor(Math.random() * w);
 
-        svg.append("svg:circle")
+        var circ = svg.append("svg:circle")
             .data([n])
             .attr("cx", function(n) { return +n.x; })
             .attr("cy", function(n) { return +n.y; })
             .attr("r", function(n) { return n.memory - 2; }) // -2 creates border
-            .style("fill", function(n) {return colors[n.status];})
-            .append("svg:title")
-            .text(function(d) { return d.addr; })
-            .transition();
+            .style("fill", function(n) {return colors[n.status];});
+         circ.append("svg:title")
+            .text(function(d) { return d.addr; });
+         svg.append("text")
+            .data([n])
+            .attr("x", function(n) { return +n.x; })
+            .attr("y", function(n) { return +n.y; })
+            .attr("dy", ".3em")
+            .style("text-anchor", "middle")
+            .text(function(d) { return d.role.substring(0,1); });
 
         g_nodes.push(n);
 
@@ -272,43 +227,6 @@
 
         force.start();
 
-        //addGraphNode();
-
-        /*
-        var svg = d3.select("#node_graph").html("").append("svg")
-            .attr("width", diameter)
-            .attr("height", diameter)
-            .attr("class", "bubble");
-
-        kids = getNodeArray();
-        var node = svg.selectAll(".node")
-            .data(bubble.nodes({"children": kids}))
-            .enter().append("g")
-            .attr("class", "node")
-            .attr("transform", function(d) { 
-                console.log("in transform"  + d);
-                return "translate(" + d.x + "," + d.y + ")"; 
-            });
-
-        node.append("title")
-            .text(function(d) { return d.addr + ": " + format(d.value); });
-
-        node.append("circle")
-            .attr("r", function(d) { return d.r; })
-            .style("fill", function(d) { 
-
-                if (d.status in colors) {
-                    return colors[d.status];
-                } 
-                return "white";
-            });
-
-        node.append("text")
-            .attr("dy", ".3em")
-            .style("text-anchor", "middle")
-            .text(function(d) { return d.name; });
-        bubble.sort();
-        */
     }
 
     function addrToId(addr) {
@@ -342,13 +260,16 @@
                     console.log("got key " + key);
                     if (key === "FIXING") {
                         var target = addrToId(message[key]);
-                        console.log("got fixing *" + target + "*");
                         nodes[target].status = "fixing";
+                        updateMemberTable();
+                        updateGraph();
                         //d3.select("#" + target).classed("success", false);
                         //d3.select("#" + target).classed("warning", true);
                     } else if (key === "FIXED") {
                         var target = addrToId(message[key]);
                         nodes[target].status = "fixed";
+                        updateMemberTable();
+                        updateGraph();
                         //d3.select("#" + target).classed("warning", false);
                         //d3.select("#" + target).classed("success", true);
                     } else if (key === "NEWNODE") {
@@ -356,17 +277,17 @@
                     } else if (key === "MEMORY_LEVEL") {
                         var level = extractArg("LEVEL", message[key]);
                         var target = extractArg("IP", message[key]);
-                        console.log("LEVEL= " + level + " IP= " + target);
 
                         if (level !== "" && target !== "") {
-                            console.log("updating level for " + addrToId(target));
-                            nodes[addrToId(target)].memory = +level;
+                            var ilevel = +level;
+                            if (ilevel !== nodes[addrToId(target)].memory) {
+                                nodes[addrToId(target)].memory = ilevel;
+                                updateMemberTable();
+                                updateGraph();
+                            }
                         }
 
                     }
-                    //Assume always need to do this
-                    updateMemberTable();
-                    updateGraph();
                 }
             }
 
@@ -386,8 +307,5 @@
 
 
     d3.json("members", updateNodes);
-
-    
-    //d3.select(self.frameElement).style("height", diameter + "px");
 
 })();
