@@ -1,1 +1,1 @@
-docker run -e "AGENT_ROLE=ui" -e "FACTORY_IPADDRESS=10.0.2.15" -e "EVENT_HANDLER=ui-event-handler.sh" -t -i -v `pwd`/logging:/tmp/logging -v `pwd`/simulation:/tmp/simulation -v `pwd`/app:/app-dev -p 5000:5000 uglyduckling.nl/ui bash /init-dev.sh
+docker run -e "AGENT_ROLE=ui" -e "FACTORY_IPADDRESS=10.0.2.15" -e "EVENT_HANDLER=UIEventHandler.py" -t -i -v `pwd`/logging:/tmp/logging -v `pwd`/simulation:/tmp/simulation -v `pwd`/app:/app-dev -p 5000:5000 uglyduckling.nl/ui bash /init-dev.sh

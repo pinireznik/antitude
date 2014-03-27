@@ -3,7 +3,7 @@ MAINTAINER amouat "a.mouat@uglyduckling.nl"
 
 # Have some more python requirements
 RUN apt-get install -y python2.7-dev curl
-RUN pip install flask twisted autobahn
+RUN pip install flask twisted autobahn requests
 
 
 ADD /serf/serf /usr/local/bin/serf
@@ -11,7 +11,7 @@ ADD /serf/supervisor_conf /etc/supervisor/conf.d
 ADD /serf/scripts /
 
 ADD /ui/app /app
-ADD /ui/ui-event-handler.sh /
+ADD /ui/UIEventHandler.py /
 #RUN pip install -r /tmp/requirements.txt
 
 # Run wrapper for serf (is this already getting run?

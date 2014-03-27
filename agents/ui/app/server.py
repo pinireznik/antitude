@@ -1,6 +1,7 @@
 import uuid
 import sys
 import subprocess
+import json
 
 from twisted.python import log
 from twisted.internet import reactor
@@ -63,8 +64,9 @@ def send_message(event):
         data = request.data
     elif len(request.form.keys()) > 0:
         data = request.form.keys()[0]
-    comp.publish_message('{"%s": "%s"}' % (event, data))
-    return "Sent %s %s" % (event, data)
+    data_as_json = json.dumps({event: data})
+    print "Publishing event %s" % data_as_json
+    comp.publish_message(data_as_json)
 
 if __name__ == "__main__":
 

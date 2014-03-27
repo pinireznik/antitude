@@ -105,6 +105,8 @@
 
     function logMessage(message) {
 
+        console.log(message);
+
         for (var key in message) {
             //Make sure avoid anything in prototype
             if (message.hasOwnProperty(key)) {

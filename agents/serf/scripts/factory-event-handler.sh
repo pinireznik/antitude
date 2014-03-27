@@ -10,7 +10,7 @@ if [ "${SERF_USER_EVENT}" = "NEWNODE" ]; then
 elif [ "${SERF_USER_EVENT}" = "NEWUINODE" ]; then
   DOCKER_IMAGE="uglyduckling.nl/ui"
   DOCKER_PORT_EXPOSE="-p 5000:5000"
-  EVENT_HANDLER="ui-event-handler.sh"
+  EVENT_HANDLER="UIEventHandler.py"
 fi
 
 if [ "${SERF_USER_EVENT}" = "NEWNODE" ] || [ "${SERF_USER_EVENT}" = "NEWUINODE" ]; then
