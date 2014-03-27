@@ -8,10 +8,9 @@ RUN pip install flask twisted autobahn requests
 
 ADD /serf/serf /usr/local/bin/serf
 ADD /serf/supervisor_conf /etc/supervisor/conf.d
-ADD /serf/scripts /
 
 ADD /ui/app /app
-ADD /ui/UIEventHandler.py /
+ADD /ui/AgentEventHandler.py /
 #RUN pip install -r /tmp/requirements.txt
 
 # Run wrapper for serf (is this already getting run?

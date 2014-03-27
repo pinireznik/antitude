@@ -9,10 +9,7 @@ LOG_FILE=/tmp/logging/$IP_ADDRESS.log
 LINE=`cat /proc/1/cgroup | tail -n 1`
 echo ${LINE: -64} >> $LOG_FILE
 
-if [ -z "$EVENT_HANDLER" ]; then
-  echo "EVENT_HANDLER environment variable is empty. Exiting." >> $LOG_FILE
-  exit 1
-fi
+EVENT_HANDLER="AgentEventHandler.py"
 
 JOIN_STRING=""
 
