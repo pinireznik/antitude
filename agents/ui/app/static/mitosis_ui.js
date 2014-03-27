@@ -6,8 +6,6 @@
     /* TODO:
      *  - keep up with messages
      *    - cljs?
-     *  - tidy up
-     *  - listen for left somehow
      *  - can just use nodes and get rid of g_nodes I think
      *  - be nice to separate base Serf functionality
      *  - need ordering/some way of telling story
@@ -114,7 +112,6 @@
             }
         }
         while ($("#message_log p").length > 5) {
-            console.log("more than 5");
             $("#message_log p")[0].remove();
         }
 
@@ -248,7 +245,7 @@
     }
 
     function addrToId(addr) {
-        return "A" + addr.replace(/\./g, "d");
+        return "A" + addr.replace(/\./g, "d").replace(/\n/g, "");
     }
 
     function extractArg(arg, string) {
@@ -273,6 +270,10 @@
             var message = $.parseJSON(args);
             logMessage(message);
 
+            /*
+             * Ignore NEWNODE and use member-join
+             * Read member-update
+             * Figure out leave stuff */
             for (var key in message) {
                 if (message.hasOwnProperty(key)) {
                     console.log("got key " + key);
@@ -286,7 +287,7 @@
                         nodes[target].status = "fixed";
                         updateMemberTable();
                         updateGraph();
-                    } else if (key === "NEWNODE" || key === "REMOVENODE") {
+                    } else if (key === "REMOVENODE") {
                         setTimeout(updateNodesFunc, 500);
                     } else if (key === "MEMORY_LEVEL") {
                         var level = extractArg("LEVEL", message[key]);
@@ -301,7 +302,8 @@
                                 updateGraph();
                             }
                         }
-
+                    } else if (key === "member-join" || key === 'member-update' || key === 'member-leave') {
+                        updateNodesFunc();
                     }
                 }
             }
