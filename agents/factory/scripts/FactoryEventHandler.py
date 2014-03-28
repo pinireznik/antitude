@@ -155,14 +155,11 @@ def memoryHandler(event, payload):
 
 
 if __name__ == '__main__':
-    if not os.path.exists('../logging'):
-        os.mkdir('../logging')
-
-    
+    if not os.path.exists(PATH + '/../../logging'):
+        os.mkdir(PATH + '/../../logging')
 
     #my_ip = socket.gethostbyname(socket.gethostname())
-    logging.basicConfig(filename='../logging/factory.log', level=logging.DEBUG)
-    
+    logging.basicConfig(filename=PATH + '/../../logging/factory.log', level=logging.DEBUG)
     try:
       payload = sys.stdin.readlines()
       if len(payload) > 0:
