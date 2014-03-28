@@ -2,7 +2,7 @@ FROM uglyduckling.nl/serf-base
 MAINTAINER Pini Reznik "p.reznik@uglyduckling.nl"
 
 
-ADD /serf/serf /usr/local/bin/serf
+ADD /skynet/serf /usr/local/bin/serf
 
 ADD /resman/supervisor_conf /etc/supervisor/conf.d
 ADD /resman/scripts /

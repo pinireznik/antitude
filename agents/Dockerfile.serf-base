@@ -7,6 +7,6 @@ RUN apt-get update
 RUN apt-get install -y unzip lsb-release wget ca-certificates supervisor python-pip libyaml-0-2 gcc
 
 # Add the requirements.txt and ask pip to install everything
-ADD serf/requirements.txt /tmp/requirements.txt
+ADD skynet/requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
