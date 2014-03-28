@@ -104,7 +104,7 @@ def createNode(env, role="serf"):
     logger = logging.getLogger(__name__)
     pwd = PATH + "/../../shared"
     image = "uglyduckling.nl/" + role
-    params = flatten(['/usr/bin/docker', 'run', '-t', '-i', env, '-d', '-v', pwd + '/logging:/tmp/logging', '-v', pwd + '/simulation:/tmp/simulation', '-v', pwd + '/configs:/tmp/configs', image])
+    params = flatten(['docker', 'run', '-t', '-i', env, '-d', '-v', pwd + '/logging:/tmp/logging', '-v', pwd + '/simulation:/tmp/simulation', '-v', pwd + '/configs:/tmp/configs', image])
     try:
         cid = subprocess.check_output(params).replace("\n", "")
     except:
@@ -130,7 +130,7 @@ def newNodeHandler(event, payload):
     logger.info("Creating container with role %s" % payload['role'])
     (cid,node_ip) = createNode(env, payload['role'])
     logger.info("Created node with CID: %s and IP: %s" % (cid, node_ip))
-    subprocess.call(["/usr/bin/serf", "event", "NODECREATED", str(cid), node_ip]) 
+    subprocess.call(["serf", "event", "NODECREATED", str(cid), node_ip]) 
     return True
     
 
@@ -146,7 +146,7 @@ def memoryHandler(event, payload):
         logger.info("Memory over 70%, creating resman")
         (cid,node_ip) = createNode(env, "resman")
         logger.info("Created node with CID: %s and IP: %s" % (cid, node_ip))
-        subprocess.call(["/usr/bin/serf", "event", "NODECREATED", str(cid), node_ip]) 
+        subprocess.call(["serf", "event", "NODECREATED", str(cid), node_ip]) 
 
 
 if __name__ == '__main__':
