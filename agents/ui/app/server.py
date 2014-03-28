@@ -67,6 +67,7 @@ def send_message(event):
     data_as_json = json.dumps({event: data})
     print "Publishing event %s" % data_as_json
     comp.publish_message(data_as_json)
+    return "Published %s" % data_as_json
 
 if __name__ == "__main__":
 

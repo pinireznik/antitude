@@ -6,7 +6,6 @@
     /* TODO:
      *  - keep up with messages
      *    - cljs?
-     *  - can just use nodes and get rid of g_nodes I think
      *  - be nice to separate base Serf functionality
      *  - need ordering/some way of telling story
      *    - show dependent nodes
@@ -22,9 +21,12 @@
     var force = d3.layout.force()
         .gravity(0)
         .charge(0)
+        .linkDistance(50)
         .nodes(g_nodes)
         .size([w, h]);
 
+    var links = force.links();
+    var pendingLinks = [];
     var started = false;
     var colors = { "alive": "#5cb85c", 
                    "failed": "#d9534f",
@@ -32,11 +34,24 @@
                    "fixed": "#5cb85c",
                    "leaving": "gray"};
 
+
     force.start();
 
     var svg = d3.select("#node_graph").append("svg:svg")
         .attr("width", w)
         .attr("height", h);
+
+    svg.append("svg:defs").append("svg:marker")
+        .attr("id", "triangle")
+        .attr("refX", "14")
+        .attr("refY", "6.5") 
+        .attr("markerUnits", "strokeWidth")
+        .attr("markerWidth", "26")
+        .attr("markerHeight", "26")
+        .attr("orient", "auto")
+        .append("svg:path")
+          .attr("d", "M2,4 L2,9 L5,6.5 L2,4")
+          .attr("style", "fill: #000000;");
 
     svg.append("svg:rect")
         .attr("width", w)
@@ -69,6 +84,16 @@
 
         svg.selectAll("text")
             .text(function(d) { return d.role.substring(0,1); });
+
+        var lines = svg.selectAll(".link");
+        lines.data(links).enter()
+            .insert("line", ".node")
+            .attr("class", "link")
+            .attr("marker-end", "url(#triangle)");
+        lines.attr("x1", function(d) { return d.source.x; })
+            .attr("y1", function(d) { return d.source.y; })
+            .attr("x2", function(d) { return d.target.x; })
+            .attr("y2", function(d) { return d.target.y; });
     });
 
     function collide(node) {
@@ -131,11 +156,12 @@
             if (!(id in nodes)) {
                 //Set a default value for memory
                 nodes[id] = {"memory": 20};
+                nodes[id].par = "None";
                 add = true;
             }
             nodes[id].addr = m.addr;
             nodes[id].radius = 8 + nodes[id].memory / 2;
-            nodes[id].name = m.name; //Yes, I know
+            nodes[id].name = m.name; 
             nodes[id].status = m.status;
             nodes[id].id = "A" + m.addr.split(":")[0].replace(/\./g, "d");
             if (m.tags.role) {
@@ -144,17 +170,45 @@
                 nodes[id].role = "?";
             }
 
+            if (m.tags.parent) {
+                if (nodes[id].par !== m.tags.parent) {
+                    nodes[id].par = m.tags.parent;
+                    pendingLinks.push({sourceId: id, targetId: addrToId(nodes[id].par)});
+                }
+            }
+
             if (add) {
                 addGraphNode(nodes[id]);
             }
+
             if (nodes[id].status === "left") {
                 removeGraphNode(nodes[id]);
             }
         }
         //Should also delete any nodes that don't appear in list
 
+        checkPendingLinks();
         updateMemberTable();
         updateGraph();
+    }
+
+    function checkPendingLinks() {
+
+        for (var i = pendingLinks.length -1; i >= 0; i--) {
+
+            var src = nodes[pendingLinks[i].sourceId];
+            var trg = nodes[pendingLinks[i].targetId];
+
+            //think src && trg should work
+            if (typeof(src) != "undefined" && typeof(trg) != "undefined") {
+                console.log(src);
+                console.log(trg);
+                links.push({source: src, target: trg});
+                pendingLinks.splice(i, 1);
+            }
+
+        }
+
     }
 
     function updateMemberTable() {
@@ -171,6 +225,7 @@
                 tr.append("td").text(n.addr);
                 tr.append("td").text(n.memory);
                 tr.append("td").text(n.role);
+                tr.append("td").text(n.par);
                 tr.append("td").text(n.status);
                 if (n.status === "fixing") {
                     tr.classed("success", false);
@@ -187,6 +242,7 @@
         thead.append("th").text("Address");
         thead.append("th").text("Memory");
         thead.append("th").text("Role");
+        thead.append("th").text("Parent");
         thead.append("th").text("Status");
 
     }
