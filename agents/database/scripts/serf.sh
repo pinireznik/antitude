@@ -46,7 +46,7 @@ if [ -e /tmp/configs/$AGENT_ROLE.cfg ]; then
   for dep in $deps
   do
     echo "Requesting dependency: $dep" >> $LOG_FILE
-    serf event -coalesce=false NEWNODE "role=$dep parent=$AGENT_ROLE"
+    serf event -coalesce=false NEWNODE "role=$dep parent=$IP_ADDRESS"
   done
 fi
 
