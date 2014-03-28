@@ -5,21 +5,24 @@ import SerfCID
 import logging
 import socket
 import sys
+import traceback
 
-MEMORY_FILE = "/tmp/memory.tmp"
 BREAK_FILE = "/tmp/break.tmp"
+IP_ADDRESS = socket.gethostbyname(socket.gethostname())
+MEMORY_FILE = "/tmp/simulation/%s/memory.tmp" % IP_ADDRESS
 
 
 class AgentEventHandler:
 
-    def __init__(self, payload=[], CID="", envVars={}, handlers={}):
+    def __init__(self, payload=[], CID="", envVars={}, event_handlers={}, query_handlers={}):
         self.payload = payload
         self.CID = CID
         self.TARGET_STRING = "TARGET"
         self.TARGET_ALL_STRING = self.TARGET_STRING + "=ALL"
         self.envVars = envVars
         self.logger = logging.getLogger(__name__)
-        self.handlers = handlers
+        self.event_handlers = event_handlers
+        self.query_handlers = query_handlers
 
     def getPayload(self):
         return self.payload
@@ -62,11 +65,18 @@ class AgentEventHandler:
         # Check we have a user event intended for this container
         if self.serfEventIs("user") and self.correctTarget():
             eventName = self.getEnvVar("SERF_USER_EVENT")
-            if eventName in self.handlers:
-                self.logger.info(
-                    "Processing user event: %s with payload of %s"
-                    % (eventName, self.payload))
-                self.handlers[eventName](eventName, self.payload)
+            if eventName in self.event_handlers:
+                self.logger.info("Processing user event: %s with payload of %s" % (eventName, self.payload))
+                self.event_handlers[eventName](eventName, self.payload)
+                self.logger.info("Processed.")
+        elif self.serfEventIs("query") and self.correctTarget():
+            queryName = self.getEnvVar("SERF_QUERY_NAME")
+            if queryName in self.query_handlers:
+                self.logger.info("Processing query: %s with payload of %s" % (queryName, self.payload))
+                try:
+                   return self.query_handlers[queryName](self.payload)
+                except:
+                   self.logger.info(traceback.format_exc())
                 self.logger.info("Processed.")
 
 
@@ -80,6 +90,12 @@ def breakHandler(event, payload):
     if not os.path.exists(BREAK_FILE):
         open(BREAK_FILE, 'w').close()
 
+def getMemory(payload):
+    logger = logging.getLogger(__name__)
+    with open(MEMORY_FILE, 'r') as f:
+        mem = f.read().strip()
+        logger.info("QUERY: Mem level is at %s" % mem)
+        return mem
 
 if __name__ == '__main__':
     if not os.path.exists('/tmp/logging'):
@@ -93,9 +109,10 @@ if __name__ == '__main__':
         payload=payload,
         CID=SerfCID.getCID(),
         envVars=os.environ,
-        handlers={"TEST_SET_MEMORY": memoryHandler,
-                  "TEST_BREAK_FILE": breakHandler})
+        event_handlers={"TEST_SET_MEMORY": memoryHandler,
+                  "TEST_BREAK_FILE": breakHandler},
+        query_handlers={"MEM_LEVEL": getMemory})
 
     logging.info("Handling Shit %s " % payload)
 
-    agentEventHandler.handleShit()
+    print agentEventHandler.handleShit()
