@@ -63,7 +63,7 @@ else
     exit 0
   else
     echo "Average mem < 70. Nothing to do."
-    serfe leave
+    serf leave
     exit 0
   fi
 fi
