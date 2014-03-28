@@ -141,6 +141,15 @@ def newNodeHandler(event, payload):
     logger.info("Created node with CID: %s and IP: %s" % (cid, node_ip))
     subprocess.call(["serf", "event", "NODECREATED", str(cid), node_ip]) 
     return True
+
+
+def getRole(ip):
+    logger = logging.getLogger(__name__)
+    output = json.loads(subprocess.check_output(["serf", "members", "-format=json"]))
+    for member in output['members']:
+        logger.info(member)
+        if ip == member['addr'].split(':')[0]:
+            return member['tags']['role']
     
 
 def memoryHandler(event, payload):
@@ -152,17 +161,12 @@ def memoryHandler(event, payload):
         env.append('FACTORY_IPADDRESS=%s' % factory_ip)
         env.append('-e')
         env.append('AGENT_ROLE=%s' % "resman")
+        env.append('-e')
+        env.append('QUERY_ROLE=%s' % getRole(payload['IP']))
         logger.info("Memory over 70%, creating resman")
         (cid,node_ip) = createNode(env, "resman")
         logger.info("Created node with CID: %s and IP: %s" % (cid, node_ip))
         subprocess.call(["serf", "event", "NODECREATED", str(cid), node_ip]) 
-
-'''
-  echo "`date '+%F %T'` Removing container with ID = $PAYLOAD" >> $LOG_FILE
-  /usr/bin/docker kill $PAYLOAD
-  /usr/bin/docker rm $PAYLOAD
-  ./serf force-leave $PAYLOAD
-'''
 
 def removeNodeHandler(event,payload):
     logger = logging.getLogger(__name__)
