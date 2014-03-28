@@ -10,7 +10,7 @@ ADD /serf/serf /usr/local/bin/serf
 ADD /serf/supervisor_conf /etc/supervisor/conf.d
 
 ADD /ui/app /app
-ADD /ui/AgentEventHandler.py /
+ADD /ui/UIEventHandler.py /
 #RUN pip install -r /tmp/requirements.txt
 
 # Run wrapper for serf (is this already getting run?
