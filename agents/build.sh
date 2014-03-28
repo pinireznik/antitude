@@ -1,9 +1,9 @@
 #!/bin/bash
 
-if [ "$1" != "serf-base" ] && [ "$1" != "skynet" ] && [ "$1" != "ui" ] && [ "$1" != "resman" ] && [ "$1" != "database" ]
+if [ "$1" != "serf-base" ] && [ "$1" != "skynet" ] && [ "$1" != "ui" ] && [ "$1" != "resman" ] && [ "$1" != "database" ] && [ "$1" != "webserver" ]
   then
     echo "Which image do you want to build?" 
-    echo "build <serf-base/skynet/ui/resman/database>"
+    echo "build <serf-base/skynet/ui/resman/database/webserver>"
     exit 1;
 fi
 echo "Copying Dockerfile.${1} to  Dockerfile"
