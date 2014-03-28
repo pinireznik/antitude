@@ -129,6 +129,9 @@ def newNodeHandler(event, payload):
     if 'role' in payload:
         env.append('AGENT_ROLE=%s' % payload['role'])
         role = payload['role']
+        if role == "ui":
+            env.append('-p')
+            env.append("5000:5000") 
     else:
         env.append('AGENT_ROLE=%s' % "skynet")
         role = "skynet"
