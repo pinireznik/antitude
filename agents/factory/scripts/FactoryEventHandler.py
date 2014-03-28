@@ -10,6 +10,10 @@ import traceback
 import json
 import inspect, os
 
+
+# NOTE: ugly code, a lot of try excepts. Its very difficult to debug this script without having access to stdout and stderr
+# Basically piping the tracebacks through logger into the log file.
+
 PATH = str(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))) 
 
 class AgentEventHandler:
@@ -153,6 +157,23 @@ def memoryHandler(event, payload):
         logger.info("Created node with CID: %s and IP: %s" % (cid, node_ip))
         subprocess.call(["serf", "event", "NODECREATED", str(cid), node_ip]) 
 
+'''
+  echo "`date '+%F %T'` Removing container with ID = $PAYLOAD" >> $LOG_FILE
+  /usr/bin/docker kill $PAYLOAD
+  /usr/bin/docker rm $PAYLOAD
+  ./serf force-leave $PAYLOAD
+'''
+
+def removeNodeHandler(event,payload):
+    logger = logging.getLogger(__name__)
+    if 'cid' in payload:
+        logger.info("Removing agent with cid: %s" % payload['cid'])
+        subprocess.call(["docker", "kill", payload['cid']]) 
+        subprocess.call(["docker", "rm", payload['cid']]) 
+        subprocess.call(["serf", "force-leave", payload['cid']]) 
+    else:
+        logger.error("Cid not found in REMOVENODE event. Not doing anything")
+    
 
 if __name__ == '__main__':
     if not os.path.exists(PATH + '/../../logging'):
@@ -171,6 +192,7 @@ if __name__ == '__main__':
           CID=SerfCID.getCID(),
           envVars=os.environ,
           handlers={"NEWNODE": newNodeHandler,
+                    "REMOVENODE": removeNodeHandler,
                     "MEMORY_LEVEL": memoryHandler})
     except:
       logging.info(traceback.format_exc())
