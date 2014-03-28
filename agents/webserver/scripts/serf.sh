@@ -8,6 +8,8 @@ IP_ADDRESS=`hostname -i`
 LOG_FILE=/tmp/logging/$IP_ADDRESS.log
 LINE=`cat /proc/1/cgroup | tail -n 1`
 echo ${LINE: -64} >> $LOG_FILE
+mkdir /tmp/simulation/$IP_ADDRESS -p
+echo 25 > /tmp/simulation/$IP_ADDRESS/memory.tmp
 
 EVENT_HANDLER="AgentEventHandler.py"
 

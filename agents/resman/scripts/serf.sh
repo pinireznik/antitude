@@ -56,13 +56,13 @@ if [ -z $QUERY_ROLE ]; then
 else
   echo "Querying role: ${QUERY_ROLE}" >> $LOG_FILE
   avg=`serf query -tag role=$QUERY_ROLE MEM_LEVEL | grep "Response from" | awk -F':' '{ SUM += $2} END { print SUM/NR }'`
-  if [ "$avg" -gt 70 ]; then
-    echo "Average mem > 70. Spawning new container"
+  if [ "$avg" -gt 40 ]; then
+    echo "Average mem > 40. Spawning new container"
     serf event NEWNODE role=$QUERY_ROLE
     serf leave 
     exit 0
   else
-    echo "Average mem < 70. Nothing to do."
+    echo "Average mem < 40. Nothing to do."
     serf leave
     exit 0
   fi
