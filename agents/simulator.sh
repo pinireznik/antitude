@@ -26,7 +26,7 @@ echo
 echo "***** Adding UI node *****"
 echo
 sleep 2
-./serf event NEWUINODE
+serf event NEWNODE role=ui
 sleep 3
 
 echo 
@@ -34,19 +34,19 @@ echo "***** Adding 4 nodes *****"
 echo
 # Add 4 nodes
 sleep 3
-./serf event NEWNODE
+serf event NEWNODE
 sleep 3
-./serf event NEWNODE
+serf event NEWNODE
 sleep 3
-./serf event NEWNODE
+serf event NEWNODE
 sleep 3
-./serf event NEWNODE
+serf event NEWNODE
 sleep 3
 
 echo 
 echo "***** Breacking all functional agents *****"
 echo
-./serf event TEST_BREAK_FILE
+serf event TEST_BREAK_FILE
 sleep 3
 
 echo
