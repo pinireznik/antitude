@@ -90,13 +90,13 @@ def flatten(x):
     return result
 
 def getFactoryIP():
-    for line in subprocess.check_output(['/usr/bin/serf', 'members']).split("\n"):
+    for line in subprocess.check_output(['serf', 'members']).split("\n"):
         if "container_factory" in line:
             return " ".join(line.split()).split(" ")[1].split(":")[0]
     return None
 
 def getNodeIP(cid):
-    out = subprocess.check_output(['/usr/bin/docker','inspect',cid])
+    out = subprocess.check_output(['docker','inspect',cid])
     return json.loads(out)[0]['NetworkSettings']['IPAddress']
     
 
