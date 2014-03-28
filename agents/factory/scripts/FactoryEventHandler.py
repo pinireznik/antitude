@@ -8,7 +8,9 @@ import sys
 import subprocess
 import traceback
 import json
+import inspect, os
 
+PATH = str(os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))) 
 
 class AgentEventHandler:
 
@@ -28,7 +30,7 @@ class AgentEventHandler:
         payload_dict = {}
         for pair in str(self.payload).split(" "):
             kv = pair.split("=")
-            payload_dict[kv[0]] = kv[1]
+            payload_dict[kv[0]] = kv[1].strip()
         return payload_dict
 
     def getCID(self):
@@ -73,25 +75,11 @@ class AgentEventHandler:
             if eventName in self.handlers:
                 self.logger.info("Processing user event: %s with payload of %s" % (eventName, self.payload))
                 try:
-                   self.handlers[eventName](eventName, self.dictPayload(), self.logger)
+                   self.handlers[eventName](eventName, self.dictPayload())
                 except:
                    self.logger.info(traceback.format_exc())
                 
 
-'''
-  HOSTNAME=`hostname`
-  for params in `echo $PAYLOAD | tr " " "\n"`
-  do
-    printf -v `echo $params | cut -d "=" -f 1` `echo $params | cut -d "=" -f 2`
-    echo DEBUG: $parent >> $LOG_FILE
-  done
-  IP_ADDRESS=`./serf members | grep $HOSTNAME | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'`
-  echo "`date '+%F %T'` Creating node with role $ROLE and attaching to factory at $IP_ADDRESS" >> $LOG_FILE
-  CID=$(/usr/bin/docker run -e "AGENT_PARENT=$parent" -e "AGENT_ROLE=$role" -e "FACTORY_IPADDRESS=$IP_ADDRESS" -e "EVENT_HANDLER=${EVENT_HANDLER}" -d -v `pwd`/logging:/tmp/logging -v `pwd`/simulation:/tmp/simulation -v `pwd`/configs:/tmp/configs ${DOCKER_PORT_EXPOSE} ${DOCKER_IMAGE})
-  NEWNODE_IP=`/usr/bin/docker inspect $CID | grep IPAddress | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}'`
-  echo "`date '+%F %T'` Created new node with CID: $CID and public IP: $NEWNODE_IP" >> $LOG_FILE
-  ./serf event NODECREATED $CID $NEWNODE_IP
-'''
 def flatten(x):
     result = []
     for el in x:
@@ -112,40 +100,60 @@ def getNodeIP(cid):
     return json.loads(out)[0]['NetworkSettings']['IPAddress']
     
 
+def createNode(env, role="serf"):
+    logger = logging.getLogger(__name__)
+    pwd = PATH + "/../../shared"
+    image = "uglyduckling.nl/" + role
+    params = flatten(['/usr/bin/docker', 'run', '-t', '-i', env, '-d', '-v', pwd + '/logging:/tmp/logging', '-v', pwd + '/simulation:/tmp/simulation', '-v', pwd + '/configs:/tmp/configs', image])
+    try:
+        cid = subprocess.check_output(params).replace("\n", "")
+    except:
+        logger.info(traceback.format_exc())
+        return (None,None)
 
-def newNodeHandler(event, payload, logger):
+    node_ip =getNodeIP(cid)
+    return (cid, node_ip)
+
+
+def newNodeHandler(event, payload):
+    logger = logging.getLogger(__name__)
     env = []
     factory_ip = getFactoryIP()
     env.append('-e')
     env.append('FACTORY_IPADDRESS=%s' % factory_ip)
-    if 'role' in payload:
-        image = "uglyduckling.nl/" + payload['role']
-    else:
-        image = "uglyduckling.nl/serf"
+    env.append('-e')
+    env.append('AGENT_ROLE=%s' % payload['role'])
     if 'parent' in payload:
         env.append('-e')
         env.append('AGENT_PARENT=%s' % payload['parent'])
-    pwd = "../shared"
-    logger.info("Creating container with role %s" % payload['role'])
-    params = flatten(['/usr/bin/docker', 'run', env, '-d', '-v', pwd + '/logging:/tmp/logging', '-v', pwd + '/simulation:/tmp/simulation', '-v', pwd + '/configs:/tmp/configs', image])
-    try:
-        cid = subprocess.check_output(params).replace("\n", "")
-    except:
-        logger.error(traceback.format_exc())
-        return False
 
-    node_ip =getNodeIP(cid)
+    logger.info("Creating container with role %s" % payload['role'])
+    (cid,node_ip) = createNode(env, payload['role'])
     logger.info("Created node with CID: %s and IP: %s" % (cid, node_ip))
     subprocess.call(["/usr/bin/serf", "event", "NODECREATED", str(cid), node_ip]) 
     return True
     
 
 def memoryHandler(event, payload):
-    return "DEBUG memory handler: " + str(payload)
+    logger = logging.getLogger(__name__)
+    if int(payload['MEMORY_LEVEL']) > 75:
+        env = []
+        factory_ip = getFactoryIP()
+        env.append('-e')
+        env.append('FACTORY_IPADDRESS=%s' % factory_ip)
+        env.append('-e')
+        env.append('AGENT_ROLE=%s' % "resman")
+        logger.info("Memory over 70%, creating resman")
+        (cid,node_ip) = createNode(env, "resman")
+        logger.info("Created node with CID: %s and IP: %s" % (cid, node_ip))
+        subprocess.call(["/usr/bin/serf", "event", "NODECREATED", str(cid), node_ip]) 
+
 
 if __name__ == '__main__':
     if not os.path.exists('../logging'):
         os.mkdir('../logging')
+
+    
 
     #my_ip = socket.gethostbyname(socket.gethostname())
     logging.basicConfig(filename='../logging/factory.log', level=logging.DEBUG)
