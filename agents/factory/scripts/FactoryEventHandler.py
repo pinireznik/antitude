@@ -122,13 +122,18 @@ def newNodeHandler(event, payload):
     env.append('-e')
     env.append('FACTORY_IPADDRESS=%s' % factory_ip)
     env.append('-e')
-    env.append('AGENT_ROLE=%s' % payload['role'])
+    if 'role' in payload:
+        env.append('AGENT_ROLE=%s' % payload['role'])
+        role = payload['role']
+    else:
+        env.append('AGENT_ROLE=%s' % "skynet")
+        role = "skynet"
     if 'parent' in payload:
         env.append('-e')
         env.append('AGENT_PARENT=%s' % payload['parent'])
 
-    logger.info("Creating container with role %s" % payload['role'])
-    (cid,node_ip) = createNode(env, payload['role'])
+    logger.info("Creating container with role %s" % role)
+    (cid,node_ip) = createNode(env, role)
     logger.info("Created node with CID: %s and IP: %s" % (cid, node_ip))
     subprocess.call(["serf", "event", "NODECREATED", str(cid), node_ip]) 
     return True
@@ -157,14 +162,23 @@ if __name__ == '__main__':
 
     #my_ip = socket.gethostbyname(socket.gethostname())
     logging.basicConfig(filename='../logging/factory.log', level=logging.DEBUG)
-    payload = sys.stdin.readlines()[0]
-    agentEventHandler = AgentEventHandler(
-        payload=payload,
-        CID=SerfCID.getCID(),
-        envVars=os.environ,
-        handlers={"NEWNODE": newNodeHandler,
-                  "MEMORY_LEVEL": memoryHandler})
+    
+    try:
+      payload = sys.stdin.readlines()
+      if len(payload) > 0:
+          payload_data = payload[0]
+      else:
+          payload_data = "params=none"
+      agentEventHandler = AgentEventHandler(
+          payload=payload_data,
+          CID=SerfCID.getCID(),
+          envVars=os.environ,
+          handlers={"NEWNODE": newNodeHandler,
+                    "MEMORY_LEVEL": memoryHandler})
+    except:
+      logging.info(traceback.format_exc())
 
     logging.info("Handling Shit %s " % payload)
 
     agentEventHandler.handleShit()
+
