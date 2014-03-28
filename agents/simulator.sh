@@ -40,7 +40,9 @@ serf event NEWNODE
 sleep 3
 serf event NEWNODE
 sleep 3
-serf event NEWNODE
+serf event NEWNODE role=webserver
+sleep 3
+serf event NEWNODE role=webserver
 sleep 3
 
 echo 
@@ -121,4 +123,4 @@ done
 echo
 echo "***** Removing a node *****"
 echo
-serf event REMOVENODE `serf members -status=alive -role=functional_agent | head -1 | cut -c1-12`
+serf event REMOVENODE cid=`serf members -status=alive -role=functional_agent | head -1 | cut -c1-12`
