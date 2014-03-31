@@ -97,11 +97,6 @@ def getMemory(payload):
         logger.info("QUERY: Mem level is at %s" % mem)
         return mem
 
-def offerResource(payload):
-    logger = logging.getLogger(__name__)
-    return IP_ADDRESS
-    
-
 if __name__ == '__main__':
     if not os.path.exists('/tmp/logging'):
         os.mkdir('/tmp/logging')
@@ -115,9 +110,8 @@ if __name__ == '__main__':
         CID=SerfCID.getCID(),
         envVars=os.environ,
         event_handlers={"TEST_SET_MEMORY": memoryHandler,
-                        "TEST_BREAK_FILE": breakHandler},
-        query_handlers={"MEM_LEVEL": getMemory,
-                        "NEED_NODE": offerResource})
+                  "TEST_BREAK_FILE": breakHandler},
+        query_handlers={"MEM_LEVEL": getMemory})
 
     logging.info("Handling Shit %s " % payload)
 
