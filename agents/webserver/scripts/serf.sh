@@ -35,6 +35,13 @@ function create_node {
 
 }
 
+function using_node {
+
+    echo "Sending USING_NODE event for $2" >> $LOG_FILE
+    serf event USING_NODE "src=$1  ip=$2"
+
+}
+
 # Check if serf-port is set and if so define the join string
 if [ -n $FACTORY_IPADDRESS ]; then
   echo "Found: $FACTORY_IPADDRESS" >> $LOG_FILE
@@ -66,19 +73,21 @@ if [ -e /tmp/configs/$AGENT_ROLE.cfg ]; then
   for dep in $deps
   do
     echo "Requesting dependency: $dep" >> $LOG_FILE
-    dbip=''
-    dbip=$(need_node $dep)
-    if [ -z "$dbip"] 
+    depip=''
+    depip=$(need_node $dep)
+    if [ -z "$depip"] 
     then
-      echo "No DB available, creating one"  >> $LOG_FILE
+      echo "No $dep available, creating one"  >> $LOG_FILE
       create_node $dep $IP_ADDRESS
       sleep 3
-      dbip=$(need_node $dep)
-      echo $dbip >> $LOG_FILE
+      depip=$(need_node $dep)
+      echo $depip >> $LOG_FILE
     else
-      echo "DB available at $dbip" >> $LOG_FILE
+      echo "$dep available at $depip" >> $LOG_FILE
+      using_node $IP_ADDRESS $depip
     fi
-    echo "DB available at $dbip" >> $LOG_FILE
+    #echo "$dep available at $depip" >> $LOG_FILE
+    #using_node $IP_ADDRESS $depip
     #serf event -coalesce=false NEWNODE "role=$dep parent=$IP_ADDRESS"
   done
 fi

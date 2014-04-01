@@ -6,6 +6,8 @@ import logging
 import socket
 import sys
 import traceback
+import json
+import subprocess
 
 BREAK_FILE = "/tmp/break.tmp"
 IP_ADDRESS = socket.gethostbyname(socket.gethostname())
@@ -46,6 +48,17 @@ class AgentEventHandler:
 
         return None
 
+    def dictPayload(self):
+        payload_dict = {}
+        for pair in self.payload:
+            if "=" in pair:
+                kv = pair.split("=")
+                payload_dict[kv[0]] = kv[1].strip()
+            else:
+                continue
+        return payload_dict
+
+
     def getEnvVar(self, envVarName):
         return self.envVars.get(envVarName)
 
@@ -67,17 +80,32 @@ class AgentEventHandler:
             eventName = self.getEnvVar("SERF_USER_EVENT")
             if eventName in self.event_handlers:
                 self.logger.info("Processing user event: %s with payload of %s" % (eventName, self.payload))
-                self.event_handlers[eventName](eventName, self.payload)
+                try:
+                    self.event_handlers[eventName](eventName, self.dictPayload())
+                except:
+                    self.logger.info(traceback.format_exc())
                 self.logger.info("Processed.")
         elif self.serfEventIs("query") and self.correctTarget():
             queryName = self.getEnvVar("SERF_QUERY_NAME")
             if queryName in self.query_handlers:
                 self.logger.info("Processing query: %s with payload of %s" % (queryName, self.payload))
                 try:
-                   return self.query_handlers[queryName](self.payload)
+                    return self.query_handlers[queryName](self.payload)
                 except:
-                   self.logger.info(traceback.format_exc())
+                    self.logger.info(traceback.format_exc())
                 self.logger.info("Processed.")
+
+def getNodeInfo(node_ip):
+    out = subprocess.check_output(['serf','members','-format', 'json'])
+    json_out = json.loads(out)
+    for member in json_out['members']:
+        if member['addr'].split(":")[0] == node_ip:
+            return member
+    return None
+
+def getNodeTags(node_ip):
+    node = getNodeInfo(node_ip)
+    return node['tags']
 
 
 def memoryHandler(event, payload):
@@ -85,10 +113,19 @@ def memoryHandler(event, payload):
         for l in payload:
             f.write(l)
 
-
 def breakHandler(event, payload):
     if not os.path.exists(BREAK_FILE):
         open(BREAK_FILE, 'w').close()
+
+def setParent(event, payload):
+    logger = logging.getLogger(__name__)
+    logger.info(payload['ip'].rstrip())
+    if IP_ADDRESS == payload['ip'].rstrip():
+        logger.info(IP_ADDRESS)
+        parents = getNodeTags(IP_ADDRESS)['parent']
+        parents = parents + "," + payload['src']
+        subprocess.call(['serf', 'tags', '-set', 'parent=' + parents ]) 
+          
 
 def getMemory(payload):
     logger = logging.getLogger(__name__)
@@ -100,7 +137,7 @@ def getMemory(payload):
 def offerResource(payload):
     logger = logging.getLogger(__name__)
     return IP_ADDRESS
-    
+   
 
 if __name__ == '__main__':
     if not os.path.exists('/tmp/logging'):
@@ -109,13 +146,14 @@ if __name__ == '__main__':
     my_ip = socket.gethostbyname(socket.gethostname())
     logging.basicConfig(filename='/tmp/logging/%s.log'
                         % my_ip, level=logging.DEBUG)
-    payload = sys.stdin.readlines()
+    payload = sys.stdin.read().split(" ")
     agentEventHandler = AgentEventHandler(
         payload=payload,
         CID=SerfCID.getCID(),
         envVars=os.environ,
         event_handlers={"TEST_SET_MEMORY": memoryHandler,
-                        "TEST_BREAK_FILE": breakHandler},
+                        "TEST_BREAK_FILE": breakHandler,
+                        "USING_NODE": setParent},
         query_handlers={"MEM_LEVEL": getMemory,
                         "NEED_NODE": offerResource})
 
