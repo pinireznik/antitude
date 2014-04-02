@@ -174,7 +174,7 @@
                     nodes[id].par = m.tags.parent;
                     var toAdd = nodes[id].par.split(",");
                     for (var j=0; j< toAdd.length; j++) {
-                        pendingLinks.push({sourceId: id, targetId: addrToId(toAdd[j])});
+                        pendingLinks.push({sourceId: addrToId(toAdd[j]), targetId: id});
                     }
                 }
             }
