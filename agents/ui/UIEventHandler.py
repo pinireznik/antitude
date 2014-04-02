@@ -10,7 +10,7 @@ if __name__ == '__main__':
         os.mkdir('/tmp/logging')
 
     my_ip = socket.gethostbyname(socket.gethostname())
-    logging.basicConfig(filename='/tmp/logging/%s.log'
+    logging.basicConfig(filename='/tmp/logging/%s/event_handler.log'
                         % my_ip, level=logging.DEBUG)
     payload = sys.stdin.read()
     try:

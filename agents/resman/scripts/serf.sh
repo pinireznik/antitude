@@ -5,7 +5,11 @@ set -e
 
 export PATH=$PATH:/usr/local/bin
 IP_ADDRESS=`hostname -i`
-LOG_FILE=/tmp/logging/$IP_ADDRESS.log
+mkdir /tmp/simulation/$IP_ADDRESS -p
+mkdir /tmp/logging/$IP_ADDRESS -p
+rm -f /tmp/logging/$IP_ADDRESS/*
+mkdir /tmp/deps
+LOG_FILE=/tmp/logging/$IP_ADDRESS/startup_script.log
 LINE=`cat /proc/1/cgroup | tail -n 1`
 echo ${LINE: -64} >> $LOG_FILE
 
