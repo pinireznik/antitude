@@ -105,7 +105,7 @@ class TestAgentEventHandler(unittest.TestCase):
                 CID=self.CID,
                 envVars={"SERF_EVENT": "user",
                          "SERF_USER_EVENT": "TEST_SET_MEMORY"},
-                handlers={"TEST_SET_MEMORY": testMemoryHandler})
+                event_handlers={"TEST_SET_MEMORY": testMemoryHandler})
             agentEventHandler.handleShit()
             self.checkLogMessages(l,
                                   "Processing user event: TEST_SET_MEMORY",
