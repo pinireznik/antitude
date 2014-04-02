@@ -5,6 +5,7 @@ MAINTAINER amouat "a.mouat@uglyduckling.nl"
 RUN pip install flask 
 
 ADD /skynet/serf /usr/local/bin/serf
+ADD /skynet/scripts/serf.sh /
 ADD /skynet/supervisor_conf /etc/supervisor/conf.d
 
 ADD /python-webapp/ /

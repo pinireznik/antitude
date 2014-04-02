@@ -7,8 +7,6 @@
      *  - keep up with messages
      *    - cljs?
      *  - be nice to separate base Serf functionality
-     *  - need ordering/some way of telling story
-     *    - show dependent nodes
      */
     var w = 960,
         h = 500;
@@ -41,6 +39,7 @@
         .attr("width", w)
         .attr("height", h);
 
+    //Definition of graphic for arrows on deps
     svg.append("svg:defs").append("svg:marker")
         .attr("id", "triangle")
         .attr("refX", "14")
@@ -173,7 +172,10 @@
             if (m.tags.parent) {
                 if (nodes[id].par !== m.tags.parent) {
                     nodes[id].par = m.tags.parent;
-                    pendingLinks.push({sourceId: id, targetId: addrToId(nodes[id].par)});
+                    var toAdd = nodes[id].par.split(",");
+                    for (var j=0; j< toAdd.length; j++) {
+                        pendingLinks.push({sourceId: id, targetId: addrToId(toAdd[j])});
+                    }
                 }
             }
 
@@ -201,8 +203,8 @@
 
             //think src && trg should work
             if (typeof(src) != "undefined" && typeof(trg) != "undefined") {
-                console.log(src);
-                console.log(trg);
+                //console.log(src);
+                //console.log(trg);
                 links.push({source: src, target: trg});
                 pendingLinks.splice(i, 1);
             }
