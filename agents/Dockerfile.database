@@ -1,11 +1,19 @@
 FROM uglyduckling.nl/serf-base
 MAINTAINER Pini Reznik "p.reznik@uglyduckling.nl"
 
+RUN apt-get install -y software-properties-common
+RUN apt-get install -y python-software-properties
+RUN add-apt-repository -y ppa:chris-lea/redis-server
+RUN apt-get update
+RUN apt-get install -y redis-server
 
 ADD /skynet/serf /usr/local/bin/serf
 
 ADD /database/supervisor_conf /etc/supervisor/conf.d
 ADD /database/scripts /
+
+# Expose ports.
+EXPOSE 6379
 
 # Run wrapper for serf
 CMD bash /serf.sh

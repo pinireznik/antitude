@@ -7,6 +7,7 @@ export PATH=$PATH:/usr/local/bin
 IP_ADDRESS=`hostname -i`
 mkdir /tmp/simulation/$IP_ADDRESS -p
 mkdir /tmp/logging/$IP_ADDRESS -p
+mkdir /tmp/deps
 LOG_FILE=/tmp/logging/$IP_ADDRESS/startup_script.log
 LINE=`cat /proc/1/cgroup | tail -n 1`
 echo ${LINE: -64} >> $LOG_FILE
@@ -75,16 +76,18 @@ if [ -e /tmp/configs/$AGENT_ROLE.cfg ]; then
     echo "Requesting dependency: $dep" >> $LOG_FILE
     depip=''
     depip=$(need_node $dep)
-    if [ -z "$depip"] 
+    if [ -z $depip] 
     then
       echo "No $dep available, creating one"  >> $LOG_FILE
       create_node $dep $IP_ADDRESS
-      sleep 3
+      sleep 5
       depip=$(need_node $dep)
-      echo $depip >> $LOG_FILE
+      echo "$dep available at $depip" >> $LOG_FILE
+      echo $depip:6379 > /tmp/deps/$dep.cfg
     else
       echo "$dep available at $depip" >> $LOG_FILE
       using_node $IP_ADDRESS $depip
+      echo $depip:6379 > /tmp/deps/$dep.cfg
     fi
     #echo "$dep available at $depip" >> $LOG_FILE
     #using_node $IP_ADDRESS $depip
