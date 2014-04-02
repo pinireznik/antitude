@@ -1,0 +1,13 @@
+FROM uglyduckling.nl/serf-base
+MAINTAINER amouat "a.mouat@uglyduckling.nl"
+
+# Have some more python requirements
+RUN pip install flask 
+
+ADD /skynet/serf /usr/local/bin/serf
+ADD /skynet/supervisor_conf /etc/supervisor/conf.d
+
+ADD /python-webapp/ /
+ADD init-python-webapp.sh /
+EXPOSE 5000
+CMD bash /init-python-webapp.sh
