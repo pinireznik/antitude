@@ -142,8 +142,10 @@ def offerResource(payload):
 if __name__ == '__main__':
     if not os.path.exists('/tmp/logging'):
         os.mkdir('/tmp/logging')
-
     my_ip = socket.gethostbyname(socket.gethostname())
+    if not os.path.exists('/tmp/logging/%s' % my_ip):
+        os.mkdir('/tmp/logging/%s' % my_ip)
+
     logging.basicConfig(filename='/tmp/logging/%s/event_handler.log'
                         % my_ip, level=logging.DEBUG)
     payload = sys.stdin.read().split(" ")
