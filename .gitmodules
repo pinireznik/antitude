@@ -1,0 +1,3 @@
+[submodule "agents/python-webapp"]
+	path = agents/python-webapp
+	url = https://amouat@bitbucket.org/uglyduckling/mitosis-web.git
