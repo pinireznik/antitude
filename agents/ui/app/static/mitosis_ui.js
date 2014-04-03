@@ -119,7 +119,7 @@
     }
 
     var connection = new autobahn.Connection({
-        url: 'ws://' + window.location.host  + ':5000/ws',
+        url: 'ws://' + window.location.host  + '/ws',
         realm: 'realm1'
     });
 
