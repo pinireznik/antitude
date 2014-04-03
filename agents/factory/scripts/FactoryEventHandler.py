@@ -129,9 +129,13 @@ def newNodeHandler(event, payload):
     if 'role' in payload:
         env.append('AGENT_ROLE=%s' % payload['role'])
         role = payload['role']
+	#This bit isn't right, but not sure how to fix in short-term
         if role == "ui":
             env.append('-p')
             env.append("5000:5000") 
+        if role == "python-webapp":
+            env.append('-p')
+            env.append("5001:5001") 
     else:
         env.append('AGENT_ROLE=%s' % "skynet")
         role = "skynet"

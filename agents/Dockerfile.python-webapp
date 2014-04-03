@@ -2,7 +2,7 @@ FROM uglyduckling.nl/serf-base
 MAINTAINER amouat "a.mouat@uglyduckling.nl"
 
 # Have some more python requirements
-RUN pip install flask 
+RUN pip install flask flask-wtf redis
 
 ADD /skynet/serf /usr/local/bin/serf
 ADD /skynet/scripts/serf.sh /
