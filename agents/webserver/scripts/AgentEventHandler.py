@@ -122,8 +122,11 @@ def setParent(event, payload):
     logger.info(payload['ip'].rstrip())
     if IP_ADDRESS == payload['ip'].rstrip():
         logger.info(IP_ADDRESS)
-        parents = getNodeTags(IP_ADDRESS)['parent']
-        parents = parents + "," + payload['src']
+        tags = getNodeTags(IP_ADDRESS)
+        if 'parent' in tags:
+            parents = tags['parent'] + "," + payload['src']
+        else:
+            parents = payload['src']
         subprocess.call(['serf', 'tags', '-set', 'parent=' + parents ]) 
           
 
