@@ -35,10 +35,13 @@ echo
 # Add 4 nodes
 sleep 5
 serf event NEWNODE role=loadbalancer 
-echo Sleeping 15s to allow for the creation of the database
+echo Waiting for database
 sleep 20
+echo Creating webserver which will reuse existing database
 serf event NEWNODE role=webserver
-sleep 15
+sleep 25
+
+echo Creating three new agents of for the same role
 serf event NEWNODE role=skynet
 sleep 3
 serf event NEWNODE role=skynet
@@ -62,8 +65,17 @@ do
   echo 90 > shared/simulation/$node/memory.tmp
   sleep 20
 done
-
 serf event NEWNODE role=skynet
+sleep 20
+echo
+echo Reducing  memory for skynet agents after automatic creation of a new one
+echo
+for node in `serf members | grep skynet | awk '{print $2}' | awk -F ':' '{print $1}'`
+do
+  echo Decreasing memory for $node
+  echo 60 > shared/simulation/$node/memory.tmp
+  sleep 5
+done
 
 #echo
 #echo "***** Increasing load *****"
