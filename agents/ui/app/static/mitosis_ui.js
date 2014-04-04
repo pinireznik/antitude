@@ -4,6 +4,7 @@
 (function() {
     "use strict";
     /* TODO:
+     * Fix the goddam ID/IP/Name issue.
      *  - keep up with messages
      *    - cljs?
      *  - be nice to separate base Serf functionality
@@ -147,8 +148,16 @@
             return console.warn(error);
         }
 
+        //F'ng hack to fix multiple IPs dead/alive.
+        //We should never have used IP as ID. I told the mofos! ;)
+        var seenIPs = [];
         for (var i = 0; i < json.members.length; i++) {
             var m = json.members[i];
+
+            if (m.status == "left" && seenIPs.indexOf(m.addr) != -1) { 
+                continue;
+            }
+            seenIPs.push(m.addr);
 
             var id = "A" + m.addr.split(":")[0].replace(/\./g, "d");
             var add = false;
