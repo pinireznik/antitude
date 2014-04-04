@@ -30,7 +30,7 @@ serf event NEWNODE role=ui
 sleep 3
 
 echo 
-echo "***** Adding 4 nodes *****"
+echo "***** Loadbalancer and it's dependancies *****"
 echo
 # Add 4 nodes
 sleep 5
