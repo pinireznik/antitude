@@ -15,6 +15,7 @@ echo ${LINE: -64} >> $LOG_FILE
 
 echo 25 > /tmp/simulation/$IP_ADDRESS/memory.tmp
 chmod o+w /tmp/simulation/$IP_ADDRESS -R
+chmod o+w /tmp/logging/$IP_ADDRESS -R
 
 EVENT_HANDLER="AgentEventHandler.py"
 
