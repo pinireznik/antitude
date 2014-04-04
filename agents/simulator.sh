@@ -56,7 +56,7 @@ sleep 15
 echo
 echo Starting to increase memory for skynet agents
 echo
-for node in `serf members | grep skynet | cut -d " " -f 3 | cut -d ":" -f 1`
+for node in `serf members | grep skynet | awk '{print $2}' | awk -F ':' '{print $1}'`
 do
   echo Increasing memory for $node
   echo 90 > shared/simulation/$node/memory.tmp
