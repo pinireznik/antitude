@@ -14,6 +14,7 @@ LINE=`cat /proc/1/cgroup | tail -n 1`
 echo ${LINE: -64} >> $LOG_FILE
 
 echo 25 > /tmp/simulation/$IP_ADDRESS/memory.tmp
+chmod o+w /tmp/simulation/$IP_ADDRESS -R
 
 EVENT_HANDLER="AgentEventHandler.py"
 
