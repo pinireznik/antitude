@@ -36,7 +36,7 @@ echo
 sleep 5
 serf event NEWNODE role=loadbalancer 
 echo Sleeping 15s to allow for the creation of the database
-sleep 40
+sleep 20
 serf event NEWNODE role=webserver
 sleep 15
 serf event NEWNODE role=skynet
@@ -50,7 +50,7 @@ echo
 echo "***** Breacking all functional agents *****"
 echo
 serf event TEST_BREAK_FILE
-sleep 15
+sleep 25
 
 
 echo
@@ -60,8 +60,10 @@ for node in `serf members | grep skynet | awk '{print $2}' | awk -F ':' '{print 
 do
   echo Increasing memory for $node
   echo 90 > shared/simulation/$node/memory.tmp
+  sleep 20
 done
 
+serf event NEWNODE role=skynet
 
 #echo
 #echo "***** Increasing load *****"
