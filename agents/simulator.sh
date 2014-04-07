@@ -50,7 +50,7 @@ serf event NEWNODE role=skynet
 sleep 5
 
 echo 
-echo "***** Breacking all functional agents *****"
+echo "***** Breaking all functional agents *****"
 echo
 serf event TEST_BREAK_FILE
 sleep 25
@@ -64,8 +64,9 @@ do
   echo Increasing memory for $node
   echo 90 > shared/simulation/$node/memory.tmp
   sleep 20
+  # docker run -d -v `pwd`:/scripts ubuntu /scripts/loop.sh
 done
-serf event NEWNODE role=skynet
+#serf event NEWNODE role=skynet
 sleep 20
 echo
 echo Reducing  memory for skynet agents after automatic creation of a new one
@@ -74,7 +75,7 @@ for node in `serf members | grep skynet | awk '{print $2}' | awk -F ':' '{print 
 do
   echo Decreasing memory for $node
   echo 60 > shared/simulation/$node/memory.tmp
-  sleep 5
+  sleep 2
 done
 
 #echo

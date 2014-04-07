@@ -108,7 +108,11 @@ def createNode(env, role="serf"):
     logger = logging.getLogger(__name__)
     pwd = PATH + "/../../shared"
     image = "uglyduckling.nl/" + role
-    params = flatten(['docker', 'run', '-t', '-i', env, '-d', '-v', pwd + '/logging:/tmp/logging', '-v', pwd + '/simulation:/tmp/simulation', '-v', pwd + '/configs:/tmp/configs', image])
+    params = flatten(['docker', 'run', env, '-d', '-v', pwd + '/logging:/tmp/logging', '-v', pwd + '/simulation:/tmp/simulation', '-v', pwd + '/configs:/tmp/configs', image])
+
+    # UGLY HACK FOR THE DEMO. OVERVRITES THE IP OF THE DEAD RESMAN
+    subprocess.call('docker run -d ubuntu /bin/sh -c "while true; do echo hello world; sleep 1; done"', shell=True)
+    
     try:
         cid = subprocess.check_output(params).replace("\n", "")
     except:
