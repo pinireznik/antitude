@@ -1,0 +1,19 @@
+rect{
+  fill: white;
+}
+.link {
+  stroke: #999;
+  stroke-width: 2px;
+}
+
+#legend {
+    background: url(antitude_legend.png);
+    /*background-size: 200px;
+    background-repeat: no-repeat;*/
+    width: 450px;
+    height: 500px;
+    left: -200px;
+    top: -30px;
+    position: absolute;
+    z-index: -10;
+}

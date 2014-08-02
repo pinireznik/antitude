@@ -1,0 +1,39 @@
+        {
+            "nodes": [
+                {"role": "ui", "memory": 21},
+                {"role": "ui", "memory": 21},
+                {"role": "ui", "memory": 22},
+                {"role": "ui", "memory": 23},
+                {"role": "ui", "memory": 21},
+                {"role": "ui", "memory": 20},
+                {"role": "ui", "memory": 22},
+                {"role": "ui", "memory": 20},
+                {"role": "ui", "memory": 23},
+                {"role": "ui", "memory": 24},
+                {"role": "ui", "memory": 20},
+                {"role": "ui", "memory": 23},
+                {"role": "ui", "memory": 23},
+                {"role": "ui", "memory": 20},
+                {"role": "ui", "memory": 21},
+                {"role": "ui", "memory": 23},
+                {"role": "ui", "memory": 22},
+                {"role": "ui", "memory": 22},
+                {"role": "ui", "memory": 21},
+                {"role": "ui", "memory": 24},
+                {"role": "loadbalancer", "memory": 24},
+                {"role": "loadbalancer", "memory": 24},
+                {"role": "loadbalancer", "memory": 20},
+                {"role": "database", "memory": 20},
+                {"role": "database", "memory": 24},
+                {"role": "database", "memory": 21},
+                {"role": "database", "memory": 23},
+                {"role": "database", "memory": 24},
+                {"role": "database", "memory": 21}
+            ],
+            "animation": [
+                {"type": "blow", "nodes": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19], "from": 20, "to": 40},
+                {"type": "blow", "nodes": [20, 21, 22], "from": 20, "to": 40},
+                {"type": "blow", "nodes": [23, 24, 25, 26, 27, 28], "from": 20, "to": 40}
+            ],
+            "timeout": 2000
+        }
